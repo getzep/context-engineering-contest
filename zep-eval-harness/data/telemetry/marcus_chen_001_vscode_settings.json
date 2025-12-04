@@ -1,0 +1,20 @@
+{
+  "description": "VS Code editor settings and preferences for Marcus Chen's development environment",
+  "user_first_name": "Marcus",
+  "user_last_name": "Chen",
+  "source": ".vscode/settings.json",
+  "editor": {
+    "vim.enable": true,
+    "editor.tabSize": 2,
+    "editor.formatOnSave": true
+  },
+  "python": {
+    "python.formatting.provider": "ruff",
+    "python.linting.ruffEnabled": true,
+    "editor.tabSize": 4
+  },
+  "typescript": {
+    "editor.tabSize": 2,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}

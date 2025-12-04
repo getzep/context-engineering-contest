@@ -1,0 +1,46 @@
+{
+  "conversation_id": "conv_012",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Tyler asked about our Python code style conventions. Can you show him the patterns? We use snake_case for Python file names like task_service.py, snake_case for function names, 4-space indentation, and double quotes for strings.",
+      "timestamp": "2024-03-23T15:00:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created a quick reference for Tyler. Python conventions: snake_case for files (task_service.py) and functions (get_user_tasks), 4-space indentation, and double quotes. This matches what ruff enforces.",
+      "timestamp": "2024-03-23T15:00:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Also remind him about the 88 character max line length for Python. It's the Black formatter default which ruff also uses. Lines shouldn't exceed 88 characters.",
+      "timestamp": "2024-03-23T15:01:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Added the 88-character line limit to the reference doc. Also noted that ruff auto-formats to this width. The pre-commit hooks will catch any violations.",
+      "timestamp": "2024-03-23T15:01:30Z"
+    },
+    {
+      "role": "user",
+      "content": "One more thing - tell him to never catch a generic Exception without re-raising it. If you catch Exception, you should either handle it specifically or re-raise after logging.",
+      "timestamp": "2024-03-23T15:02:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Added that to the doc. \"Never catch bare Exception unless you re-raise. Use specific exception types like ValueError, TaskFlowError, or at minimum log and re-raise.\"",
+      "timestamp": "2024-03-23T15:02:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Good. I do my code reviews first thing in the morning so he can expect feedback then. I usually review PRs between 10am when I start and standup at 10:30am.",
+      "timestamp": "2024-03-23T15:03:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Let Tyler know to expect reviews between 10am and 10:30am before your daily standup. I'll remind him about your code style preferences too.",
+      "timestamp": "2024-03-23T15:03:30Z"
+    }
+  ]
+}

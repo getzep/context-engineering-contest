@@ -1,0 +1,56 @@
+{
+  "conversation_id": "conv_001",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Hey, I need to start working on the task sharing feature for our collaboration sprint. Can you create a new branch for me? The ticket is TF-247.",
+      "timestamp": "2024-03-15T10:45:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created branch feat/TF-247-task-sharing and switched to it. Ready to start on the task sharing feature.",
+      "timestamp": "2024-03-15T10:45:15Z"
+    },
+    {
+      "role": "user",
+      "content": "Great. First let's add the database model. Create a new model for shared_tasks - remember we use plural snake_case for table names, UUID v4 for the id column, and always include created_at and updated_at timestamps in UTC.",
+      "timestamp": "2024-03-15T10:46:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created the SharedTask model in src/models/shared_task.py with UUID primary key, created_at/updated_at timestamps (UTC), and the table name 'shared_tasks'. Added foreign keys to tasks and users tables with indexes as per your convention.",
+      "timestamp": "2024-03-15T10:46:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Perfect. Now create the Alembic migration for this. And make sure you use soft deletes with deleted_at instead of hard deletes.",
+      "timestamp": "2024-03-15T10:47:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Generated Alembic migration in alembic/versions/20240315_add_shared_tasks.py. Added deleted_at column for soft deletes and indexes on all foreign keys (task_id, shared_by_user_id, shared_with_user_id).",
+      "timestamp": "2024-03-15T10:47:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Now let's add the FastAPI endpoint. Put it in the tasks router. Remember our API uses /api/v1/ versioning and plural nouns for resources. The endpoint should be POST /api/v1/tasks/{task_id}/shares",
+      "timestamp": "2024-03-15T10:48:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Added the share endpoint to src/api/v1/routers/tasks.py. Created POST /api/v1/tasks/{task_id}/shares with proper request/response models using Pydantic v2. Included the standard response wrapper format with data and meta fields.",
+      "timestamp": "2024-03-15T10:48:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Good. For the error responses, use our standard format with error_code, message, and details fields. Also make sure you're using our custom TaskFlowError exception class for domain errors.",
+      "timestamp": "2024-03-15T10:49:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Updated the endpoint with proper error handling. Added TaskFlowError raises for invalid task_id and permission errors. Error responses follow your format with error_code, message, and details. Also added correlation_id to all log entries for tracing.",
+      "timestamp": "2024-03-15T10:49:30Z"
+    }
+  ]
+}

@@ -1,0 +1,425 @@
+{
+  "user_id": "marcus_chen_001",
+  "test_cases": [
+    {
+      "id": "easy_001",
+      "category": "easy",
+      "query": "Who reviews my backend PRs?",
+      "golden_answer": "Sarah Kim reviews your backend PRs.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_002",
+      "category": "easy",
+      "query": "Who reviews my frontend PRs?",
+      "golden_answer": "Jake Morrison reviews your frontend PRs.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_003",
+      "category": "easy",
+      "query": "What's the ticket prefix I use for branches?",
+      "golden_answer": "You use TF as the ticket prefix for branches.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_004",
+      "category": "easy",
+      "query": "How many spaces do I use for Python indentation?",
+      "golden_answer": "You use 4 spaces for Python indentation.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_005",
+      "category": "easy",
+      "query": "How many spaces do I use for TypeScript indentation?",
+      "golden_answer": "You use 2 spaces for TypeScript indentation.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_006",
+      "category": "easy",
+      "query": "What type of quotes do I prefer in Python code?",
+      "golden_answer": "You prefer double quotes in Python code.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_007",
+      "category": "easy",
+      "query": "What type of quotes do I prefer in TypeScript?",
+      "golden_answer": "You prefer single quotes in TypeScript.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_008",
+      "category": "easy",
+      "query": "What's my minimum test coverage requirement?",
+      "golden_answer": "Your minimum test coverage requirement is 80%.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_009",
+      "category": "easy",
+      "query": "What port does my local PostgreSQL database run on?",
+      "golden_answer": "Your local PostgreSQL database runs on port 5433.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_010",
+      "category": "easy",
+      "query": "What package manager do I use for Python?",
+      "golden_answer": "You use uv for Python package management.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_011",
+      "category": "easy",
+      "query": "What package manager do I use for Node.js?",
+      "golden_answer": "You use pnpm for Node.js package management.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_012",
+      "category": "easy",
+      "query": "What framework do I use for the backend?",
+      "golden_answer": "You use FastAPI for the backend.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_013",
+      "category": "easy",
+      "query": "What do I use for state management in React?",
+      "golden_answer": "You use Zustand for state management in React.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_014",
+      "category": "easy",
+      "query": "What linter do I use for Python?",
+      "golden_answer": "You use ruff for Python linting.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_015",
+      "category": "easy",
+      "query": "What's the name of the junior developer I mentor?",
+      "golden_answer": "You mentor a junior developer named Tyler.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_016",
+      "category": "easy",
+      "query": "What days am I allowed to deploy?",
+      "golden_answer": "You deploy only on Tuesdays and Thursdays.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_017",
+      "category": "easy",
+      "query": "What time is my daily standup?",
+      "golden_answer": "Your daily standup is at 10:30am.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_018",
+      "category": "easy",
+      "query": "What's my company name?",
+      "golden_answer": "Your company is TaskFlow AI.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_019",
+      "category": "easy",
+      "query": "What's the max line length for my Python code?",
+      "golden_answer": "Your max line length for Python is 88 characters.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "easy_020",
+      "category": "easy",
+      "query": "What merge strategy do I use?",
+      "golden_answer": "You use squash merge strategy.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_001",
+      "category": "medium",
+      "query": "What's my complete branch naming convention?",
+      "golden_answer": "Your branch naming convention is <type>/<ticket>-<description>, using the TF prefix (e.g., feat/TF-123-add-feature).",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_002",
+      "category": "medium",
+      "query": "What are the required sections in my PR descriptions?",
+      "golden_answer": "Your PR descriptions require three sections: Changes, Testing, and Screenshots.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_003",
+      "category": "medium",
+      "query": "What CI checks must pass before I can merge?",
+      "golden_answer": "Your CI checks that must pass are: lint, type-check, and tests.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_004",
+      "category": "medium",
+      "query": "What fields are in my API error response format?",
+      "golden_answer": "Your API error responses include error_code, message, and details fields.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_005",
+      "category": "medium",
+      "query": "What's my testing setup for the frontend?",
+      "golden_answer": "Your frontend testing uses Vitest for unit tests, Playwright for E2E tests, and files are named <component>.test.tsx.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_006",
+      "category": "medium",
+      "query": "What's my testing setup for the backend?",
+      "golden_answer": "Your backend testing uses Pytest, factory_boy for test data, and files are named test_<module>.py.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_007",
+      "category": "medium",
+      "query": "What are my database timestamp conventions?",
+      "golden_answer": "Your database tables always include created_at and updated_at timestamps, stored in UTC.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_008",
+      "category": "medium",
+      "query": "How do I handle primary keys in the database?",
+      "golden_answer": "You use UUID v4 for primary keys, the column is named 'id', and you always add indexes on foreign keys.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_009",
+      "category": "medium",
+      "query": "How do I organize imports in Python?",
+      "golden_answer": "You organize imports in order: standard library first, then third-party packages, then local imports, with blank lines between groups.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_010",
+      "category": "medium",
+      "query": "What's my local database development setup?",
+      "golden_answer": "You use PostgreSQL running in Docker Compose on port 5433.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_011",
+      "category": "medium",
+      "query": "What are my basic Python code style rules?",
+      "golden_answer": "Your Python code style uses 4-space indentation, double quotes, and 88-character max line length.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_012",
+      "category": "medium",
+      "query": "What are my TypeScript code style rules?",
+      "golden_answer": "Your TypeScript code style uses 2-space indentation, single quotes, and camelCase for functions.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_013",
+      "category": "medium",
+      "query": "What are my React component conventions?",
+      "golden_answer": "You use PascalCase naming for React components, prefer functional components, and use hooks.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_014",
+      "category": "medium",
+      "query": "How do I implement soft deletes?",
+      "golden_answer": "You implement soft deletes using a deleted_at timestamp column instead of hard deletes.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_015",
+      "category": "medium",
+      "query": "What's my JWT authentication setup?",
+      "golden_answer": "You use JWT tokens with 15-minute expiry, sent in the Authorization header.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_016",
+      "category": "medium",
+      "query": "Who reviews different types of PRs on my team?",
+      "golden_answer": "Sarah Kim reviews backend PRs, Jake Morrison reviews frontend PRs, and Priya Patel reviews infrastructure changes.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_017",
+      "category": "medium",
+      "query": "How do I handle API pagination?",
+      "golden_answer": "You use cursor-based pagination with limit and cursor parameters.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_018",
+      "category": "medium",
+      "query": "What's my deployment schedule?",
+      "golden_answer": "You deploy only on Tuesdays and Thursdays, never on Fridays.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_019",
+      "category": "medium",
+      "query": "What are the requirements before I can merge a PR?",
+      "golden_answer": "Before merging, you need at least one approval, CI must pass, and you must rebase on main.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "medium_020",
+      "category": "medium",
+      "query": "What's my API versioning and resource naming approach?",
+      "golden_answer": "You use URL path versioning (/api/v1/) and plural nouns for resource names.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_001",
+      "category": "hard",
+      "query": "What are all my Python code style requirements?",
+      "golden_answer": "Your Python code style requires: 4-space indentation, double quotes, 88-character max line length, snake_case for function names, and type hints are mandatory.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_002",
+      "category": "hard",
+      "query": "What are all my TypeScript code style requirements?",
+      "golden_answer": "Your TypeScript code style requires: 2-space indentation, single quotes, camelCase for functions, PascalCase for React components, and the @ alias for absolute imports from src.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_003",
+      "category": "hard",
+      "query": "What's my complete PR workflow before merging?",
+      "golden_answer": "Before merging: rebase your branch on main, get at least one approval, ensure CI passes, use squash merge, and delete the branch after merging.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_004",
+      "category": "hard",
+      "query": "What's my complete error handling strategy across the stack?",
+      "golden_answer": "Your error handling uses: custom TaskFlowError exception classes in Python, error boundaries at the route level in React, toast notifications for user-facing errors, structured JSON logging, and correlation IDs for tracing.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_005",
+      "category": "hard",
+      "query": "What's my complete testing philosophy and approach?",
+      "golden_answer": "Your testing approach: 80% minimum coverage for new code, prefer integration tests over unit tests for APIs, use factory_boy for test data, write failing test first for bug fixes (TDD), and E2E tests only for critical user journeys.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_006",
+      "category": "hard",
+      "query": "What's my complete local development environment setup?",
+      "golden_answer": "Your local setup: VS Code with Vim keybindings, uv for Python packages, pnpm for Node packages, PostgreSQL in Docker on port 5433, and .env.local for environment variables.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_007",
+      "category": "hard",
+      "query": "What are all my database table conventions?",
+      "golden_answer": "Your database conventions: plural snake_case table names, UUID v4 primary keys in a column named 'id', created_at and updated_at timestamps in UTC, soft deletes with deleted_at, and indexes on all foreign keys.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_008",
+      "category": "hard",
+      "query": "What are all my API design standards?",
+      "golden_answer": "Your API standards: plural nouns for resources, cursor-based pagination with limit and cursor params, response wrapper format {\"data\": ..., \"meta\": {...}}, URL versioning at /api/v1/, and JWT auth in Authorization header.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_009",
+      "category": "hard",
+      "query": "What's my complete weekly meeting and deployment schedule?",
+      "golden_answer": "Your schedule: daily standup at 10:30am, sprint planning on Monday mornings, no-meeting Wednesday afternoons for focus time, and deploys only on Tuesdays and Thursdays.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_010",
+      "category": "hard",
+      "query": "What's my complete frontend tech stack?",
+      "golden_answer": "Your frontend stack: React 18 with TypeScript, TailwindCSS for styling, Zustand for state management, React Query (TanStack Query) for server state, and zod for runtime validation.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_011",
+      "category": "hard",
+      "query": "What's my complete backend tech stack?",
+      "golden_answer": "Your backend stack: FastAPI for the framework, PostgreSQL for the database, SQLAlchemy 2.0 with async support, Pydantic v2 for validation, and Alembic for migrations.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_012",
+      "category": "hard",
+      "query": "What's my complete logging and monitoring setup?",
+      "golden_answer": "Your monitoring setup: Sentry for error tracking, structured JSON logging, correlation IDs for request tracing, full stack traces at ERROR level, and summaries at WARNING level.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_013",
+      "category": "hard",
+      "query": "What are all my code quality pet peeves to avoid?",
+      "golden_answer": "Your pet peeves: never use the 'any' type in TypeScript, no print() in production Python code, never hardcode secrets, no SELECT * in database queries, and no console.log in committed code.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_014",
+      "category": "hard",
+      "query": "Who are all the people involved in code reviews and what do they review?",
+      "golden_answer": "Your review team: Sarah Kim reviews backend PRs, Jake Morrison reviews frontend PRs, Priya Patel reviews infrastructure/DevOps changes, and you mentor junior dev Tyler. All PRs require at least one approval.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_015",
+      "category": "hard",
+      "query": "What are all my file naming conventions across the codebase?",
+      "golden_answer": "Your file naming: kebab-case for TypeScript files, snake_case for Python files, test_<module>.py for Python tests, <component>.test.tsx for React tests, and PascalCase for React component names.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_016",
+      "category": "hard",
+      "query": "What's my complete Git commit and branch workflow?",
+      "golden_answer": "Your Git workflow: conventional commits (feat:, fix:, etc.), branch naming as type/TF-ticket-description, squash merges only, delete branches after merge, and always rebase on main before creating PR.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_017",
+      "category": "hard",
+      "query": "What's my complete AI and LLM integration stack?",
+      "golden_answer": "Your AI stack: OpenAI GPT-4 API for the LLM, LangChain for orchestration, used for automatic task categorization, priority suggestions, and task breakdown recommendations.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_018",
+      "category": "hard",
+      "query": "What's my complete infrastructure and deployment stack?",
+      "golden_answer": "Your infrastructure: Docker for containerization, AWS ECS for deployment, GitHub Actions for CI/CD, LaunchDarkly for feature flags, and Sentry for error monitoring.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_019",
+      "category": "hard",
+      "query": "What's the current state of the project and known issues?",
+      "golden_answer": "Current project state: investor demo day is on the 15th of next month, the auth system needs refactoring (using legacy JWT library), task list queries are slow with over 1000 tasks, you recently migrated to a hybrid REST/GraphQL approach, and the current sprint focuses on collaboration features.",
+      "requires_telemetry": false
+    },
+    {
+      "id": "hard_020",
+      "category": "hard",
+      "query": "What are all the tools and configs in my development environment?",
+      "golden_answer": "Your dev environment: VS Code with Vim keybindings, iTerm2 with zsh and oh-my-zsh, uv for Python, pnpm for Node, pre-commit hooks for linting and formatting, and .env.local for local environment variables.",
+      "requires_telemetry": false
+    }
+  ]
+}

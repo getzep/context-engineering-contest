@@ -1,0 +1,22 @@
+{
+  "description": "Docker Compose configuration for Marcus Chen's local development database setup",
+  "user_first_name": "Marcus",
+  "user_last_name": "Chen",
+  "source": "docker-compose.yml",
+  "version": "3.8",
+  "services": {
+    "postgres": {
+      "image": "postgres:15",
+      "ports": ["5433:5432"],
+      "environment": {
+        "POSTGRES_DB": "taskflow_dev",
+        "POSTGRES_USER": "taskflow",
+        "POSTGRES_PASSWORD": "local_dev_password"
+      },
+      "volumes": ["postgres_data:/var/lib/postgresql/data"]
+    }
+  },
+  "volumes": {
+    "postgres_data": {}
+  }
+}

@@ -1,0 +1,14 @@
+[
+  {
+    "user_id": "marcus_chen_001",
+    "first_name": "Marcus",
+    "last_name": "Chen",
+    "email": "marcus.chen@taskflowai.com",
+    "metadata": {
+      "occupation": "Senior Full Stack Developer",
+      "company": "TaskFlow AI",
+      "role": "Full Stack Developer",
+      "tech_lead": false
+    }
+  }
+]

@@ -1,0 +1,21 @@
+{
+  "description": "Git configuration and workflow conventions for Marcus Chen's development process",
+  "user_first_name": "Marcus",
+  "user_last_name": "Chen",
+  "source": ".gitconfig",
+  "merge": {
+    "strategy": "squash"
+  },
+  "branch": {
+    "naming_convention": "<type>/<ticket>-<description>",
+    "ticket_prefix": "TF",
+    "types": ["feat", "fix", "refactor", "test", "docs", "chore"]
+  },
+  "commit": {
+    "convention": "conventional",
+    "types": ["feat", "fix", "refactor", "test", "docs", "chore"]
+  },
+  "hooks": {
+    "pre-commit": ["lint", "type-check", "test"]
+  }
+}

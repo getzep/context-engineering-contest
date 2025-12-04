@@ -1,0 +1,56 @@
+{
+  "conversation_id": "conv_003",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "I need to create a new React component for displaying shared tasks. Create TaskShareCard.tsx in the components folder. Remember we use kebab-case for TypeScript file names - so it should be task-share-card.tsx",
+      "timestamp": "2024-03-17T14:30:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created src/components/task-share-card.tsx with the TaskShareCard component. Used PascalCase for the component name as per your convention.",
+      "timestamp": "2024-03-17T14:30:20Z"
+    },
+    {
+      "role": "user",
+      "content": "Good. Make sure you're using 2 spaces for indentation and single quotes in TypeScript. Also use camelCase for function names like handleAcceptShare.",
+      "timestamp": "2024-03-17T14:31:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Updated the file with 2-space indentation and single quotes. Added handleAcceptShare and handleDeclineShare functions in camelCase. Component is functional with hooks as you prefer over class components.",
+      "timestamp": "2024-03-17T14:31:30Z"
+    },
+    {
+      "role": "user",
+      "content": "For the imports, use the @ alias for absolute imports from src. And organize them in the right order - stdlib first if any, then third-party like React, then local imports with blank lines between groups.",
+      "timestamp": "2024-03-17T14:32:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Reorganized imports: React and react-query at top, then local imports using @/components and @/hooks aliases. Added blank lines between groups.",
+      "timestamp": "2024-03-17T14:32:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Add validation for the share data using zod. We use that for runtime validation in TypeScript. Also style it with TailwindCSS.",
+      "timestamp": "2024-03-17T14:33:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Added zod schema for ShareData validation. Styled the component with TailwindCSS utility classes. Used your standard card styling pattern with rounded corners and shadow.",
+      "timestamp": "2024-03-17T14:33:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Now write a test for it. Use Vitest since that's what we use for frontend unit tests. Name it task-share-card.test.tsx.",
+      "timestamp": "2024-03-17T14:34:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created src/components/task-share-card.test.tsx with Vitest tests covering the accept/decline functionality and validation. All tests passing.",
+      "timestamp": "2024-03-17T14:34:30Z"
+    }
+  ]
+}

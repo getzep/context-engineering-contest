@@ -1,0 +1,27 @@
+{
+  "description": "Python project configuration from pyproject.toml for Marcus Chen's TaskFlow backend",
+  "user_first_name": "Marcus",
+  "user_last_name": "Chen",
+  "source": "pyproject.toml",
+  "project": {
+    "name": "taskflow-api",
+    "requires-python": ">=3.11"
+  },
+  "tool": {
+    "ruff": {
+      "line-length": 88,
+      "select": ["E", "F", "I"],
+      "fixable": ["ALL"]
+    },
+    "pytest": {
+      "minversion": "7.0",
+      "addopts": "-ra -q --cov=src --cov-fail-under=80"
+    }
+  },
+  "dependencies": [
+    "fastapi>=0.100.0",
+    "sqlalchemy[asyncio]>=2.0",
+    "pydantic>=2.0",
+    "alembic>=1.11"
+  ]
+}

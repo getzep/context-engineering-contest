@@ -1,0 +1,46 @@
+{
+  "conversation_id": "conv_004",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "Can you create a PR for the task sharing feature? Branch is feat/TF-247-task-sharing. Sarah Kim will review it since it's backend code. Make sure the PR title follows our format with the ticket number in brackets.",
+      "timestamp": "2024-03-18T09:15:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "First let me rebase on main to make sure we're up to date before creating the PR.",
+      "timestamp": "2024-03-18T09:15:15Z"
+    },
+    {
+      "role": "user",
+      "content": "Yes good thinking. Always rebase on main before creating a PR. Then create it with the title [TF-247] Add task sharing feature.",
+      "timestamp": "2024-03-18T09:16:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Rebased on main successfully. Created PR with title \"[TF-247] Add task sharing feature\". Added the three required sections in the description: Changes, Testing, and Screenshots.",
+      "timestamp": "2024-03-18T09:16:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Perfect. I'll ping Sarah for the review. Once she approves and CI passes, we can merge. Remember we need at least one approval before merging.",
+      "timestamp": "2024-03-18T09:17:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Noted. CI is currently running lint, type-check, and tests. I'll monitor the status.",
+      "timestamp": "2024-03-18T09:17:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Once it's approved and CI passes, do a squash merge. I hate merge commits. Then delete the branch after.",
+      "timestamp": "2024-03-18T09:18:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Will do. I'll squash merge once approved and CI is green, then delete the feat/TF-247-task-sharing branch.",
+      "timestamp": "2024-03-18T09:18:20Z"
+    }
+  ]
+}

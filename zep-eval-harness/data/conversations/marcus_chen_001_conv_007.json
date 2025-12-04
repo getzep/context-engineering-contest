@@ -1,0 +1,46 @@
+{
+  "conversation_id": "conv_007",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "I need to set up my new MacBook for development. Let me document the setup. I use VS Code with Vim keybindings - can you check if my settings.json is backed up?",
+      "timestamp": "2024-03-20T09:00:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Found your VS Code settings backup in the dotfiles repo. It has vim.enable: true and your preferred theme. Ready to restore.",
+      "timestamp": "2024-03-20T09:00:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Good. I also use iTerm2 with zsh and oh-my-zsh. Make sure my shell config is there too. Then I need to set up uv for Python package management - we switched from pip recently.",
+      "timestamp": "2024-03-20T09:01:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Found your .zshrc with oh-my-zsh config. Installing uv via curl and verified it's in PATH. Also installing pnpm for Node.js package management.",
+      "timestamp": "2024-03-20T09:01:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Yes, pnpm for Node.js. Now set up the local database. We run PostgreSQL in Docker Compose on port 5433 - we use that non-standard port to avoid conflicts with any local PostgreSQL installations.",
+      "timestamp": "2024-03-20T09:02:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Started PostgreSQL container via docker-compose. Mapped to port 5433. Verified connection works. Also ran Alembic migrations to set up the schema.",
+      "timestamp": "2024-03-20T09:02:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Don't forget to copy the .env.example to .env.local for the environment variables. That's where all our local dev config goes. The .env.local file is gitignored so secrets stay local.",
+      "timestamp": "2024-03-20T09:03:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Copied .env.example to .env.local and filled in the local PostgreSQL connection string for port 5433. Also set up the pre-commit hooks by running pre-commit install.",
+      "timestamp": "2024-03-20T09:03:30Z"
+    }
+  ]
+}

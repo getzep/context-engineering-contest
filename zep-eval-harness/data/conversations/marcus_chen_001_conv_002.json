@@ -1,0 +1,56 @@
+{
+  "conversation_id": "conv_002",
+  "user_id": "marcus_chen_001",
+  "messages": [
+    {
+      "role": "user",
+      "content": "There's a bug where users can't update their task priorities. Ticket TF-251. Before fixing it, I want to write a failing test first - you know I always do TDD for bug fixes.",
+      "timestamp": "2024-03-16T11:00:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Created branch fix/TF-251-priority-update-bug. Writing the failing test now in tests/test_task_priority.py following your naming convention.",
+      "timestamp": "2024-03-16T11:00:20Z"
+    },
+    {
+      "role": "user",
+      "content": "Use factory_boy to create the test data instead of fixtures. And make it an integration test for the API endpoint rather than a unit test - I prefer integration tests for API endpoints.",
+      "timestamp": "2024-03-16T11:01:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Updated the test to use TaskFactory from factory_boy. Created an integration test that hits the actual endpoint. The test is failing as expected - the PATCH request returns 500 instead of 200.",
+      "timestamp": "2024-03-16T11:01:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Good. Now fix the bug. It's probably in the task service. Also run ruff to make sure there are no linting issues.",
+      "timestamp": "2024-03-16T11:02:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Found the bug in src/services/task_service.py - the priority validation was checking against the wrong enum. Fixed it and ran ruff. No linting issues. The test is now passing.",
+      "timestamp": "2024-03-16T11:02:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Run the full test suite with pytest to make sure we haven't broken anything. We need at least 80% coverage on new code.",
+      "timestamp": "2024-03-16T11:03:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Ran pytest with coverage. All 147 tests passing. The new code has 94% coverage, well above the 80% minimum. Ready to commit.",
+      "timestamp": "2024-03-16T11:03:30Z"
+    },
+    {
+      "role": "user",
+      "content": "Great. Commit it with conventional commits style - this is a fix so use the fix: prefix.",
+      "timestamp": "2024-03-16T11:04:00Z"
+    },
+    {
+      "role": "assistant",
+      "content": "Committed with message: \"fix: resolve priority update validation error in task service\". Ready to push and create PR when you're ready.",
+      "timestamp": "2024-03-16T11:04:20Z"
+    }
+  ]
+}
