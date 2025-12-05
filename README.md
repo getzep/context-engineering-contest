@@ -43,15 +43,7 @@ Make sure you open the Codespace on your fork (not the original repository) so y
 
 ### 2. Set Up API Keys
 
-After your Codespace finishes setting up (watch for the welcome message), edit the automatically-created `.env` file with your API keys:
-
-```bash
-# The .env file is in the workspace root directory
-# Navigate to the root if needed:
-code ../.env
-```
-
-Add these keys:
+After your Codespace finishes setting up, edit the automatically-created `.env` file in the workspace root directory with your API keys:
 
 **OpenAI API Key** (shared for this workshop):
 ```
@@ -105,7 +97,19 @@ Pay special attention to the `context` section: if `timed_out_count` is greater 
 
 The dataset simulates a **general-purpose coding agent** (think Claude Code, Cursor, or GitHub Copilot) that has been assisting a developer named **Marcus Chen** over multiple sessions. Marcus is a Senior Full Stack Developer at TaskFlow AI, and he's been using this coding agent to help with his daily work.
 
-The agent has accumulated knowledge about Marcus through their conversations: his coding preferences, team members, workflows, tech stack, and project context. Now, when Marcus asks questions, the agent needs to retrieve the right context from its memory to give accurate, personalized responses.
+The agent has accumulated knowledge about Marcus through two types of data ingested into Zep's knowledge graph:
+
+1. **Conversations**: 12 conversation threads containing 100+ messages between Marcus and his coding assistant
+2. **JSON Telemetry Data**: Structured configuration files from Marcus's development environment:
+   - `vscode_settings.json` - Editor preferences (Vim mode, tab sizes, formatters)
+   - `package.json` - Node.js dependencies and scripts (pnpm, React, Zustand, Vitest)
+   - `pyproject.json` - Python project configuration (uv package manager)
+   - `git_config.json` - Git workflow conventions (branch naming, commit types, merge strategy)
+   - `docker_compose.json` - Container orchestration setup
+
+This JSON telemetry provides a complete, unified view of Marcus Chen's development world—his tech stack, tooling preferences, and workflow conventions—complementing the conversational context with structured technical details.
+
+Now, when Marcus asks questions, the agent needs to retrieve the right context from this knowledge graph to give accurate, personalized responses.
 
 ### Example Conversations
 
