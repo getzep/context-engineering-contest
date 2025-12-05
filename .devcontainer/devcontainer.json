@@ -2,9 +2,9 @@
   "name": "Zep Eval Harness",
   "image": "mcr.microsoft.com/devcontainers/python:3.10",
 
-  "postCreateCommand": "pip install uv && bash ../.devcontainer/post-create.sh",
+  "postCreateCommand": "pip install uv && bash .devcontainer/post-create.sh",
 
-  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}/zep-eval-harness",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
 
   "customizations": {
     "vscode": {
@@ -14,8 +14,9 @@
         "charliermarsh.ruff"
       ],
       "settings": {
-        "python.defaultInterpreterPath": ".venv/bin/python",
-        "python.terminal.activateEnvironment": true
+        "python.defaultInterpreterPath": "zep-eval-harness/.venv/bin/python",
+        "python.terminal.activateEnvironment": true,
+        "terminal.integrated.cwd": "${workspaceFolder}/zep-eval-harness"
       }
     }
   },
