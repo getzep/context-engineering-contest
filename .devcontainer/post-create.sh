@@ -21,13 +21,15 @@ uv sync
 echo "✅ Dependencies installed successfully!"
 echo ""
 
-# Check if .env exists, if not copy from .env.example
+# Check if .env exists in workspace root, if not copy from .env.example
+cd ..
 if [ ! -f .env ]; then
     if [ -f .env.example ]; then
         cp .env.example .env
-        echo "✅ Created .env file from template"
+        echo "✅ Created .env file from template in workspace root"
     fi
 fi
+cd zep-eval-harness
 
 echo ""
 echo "╔════════════════════════════════════════════════════════════════╗"
@@ -42,7 +44,7 @@ echo ""
 echo "Next steps:"
 echo ""
 echo "1. Add your API keys to the .env file:"
-echo "   📝 Edit: zep-eval-harness/.env"
+echo "   📝 Edit: .env (in workspace root)"
 echo ""
 echo "   You'll need:"
 echo "   • ZEP_API_KEY - Get yours at https://app.getzep.com"
