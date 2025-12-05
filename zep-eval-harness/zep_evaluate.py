@@ -767,6 +767,13 @@ async def evaluate_all_questions(
         print(f"Test cases: {len(test_cases)}")
         print(f"{'='*80}\n")
 
+        # Warm the user cache before running tests
+        print(f"Warming user cache for {zep_user_id}...")
+        await zep_client.user.warm(user_id=zep_user_id)
+        # Wait 1 second to allow the cache to fully warm
+        await asyncio.sleep(1)
+        print("Cache warmed, starting evaluation...\n")
+
         # Process queries in batches of 5 to avoid overwhelming the API
         batch_size = 15
         user_results = []
@@ -1285,7 +1292,7 @@ def print_summary(stats: Dict[str, Any]):
 
 
 async def main():
-    # Load environment variables
+    # Load environment variables from workspace root
     load_dotenv()
 
     # Parse command-line arguments

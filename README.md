@@ -46,9 +46,9 @@ Make sure you open the Codespace on your fork (not the original repository) so y
 After your Codespace finishes setting up (watch for the welcome message), edit the automatically-created `.env` file with your API keys:
 
 ```bash
-# The .env file is in the zep-eval-harness directory
-# Your terminal is already there, so just edit it:
-code .env
+# The .env file is in the workspace root directory
+# Navigate to the root if needed:
+code ../.env
 ```
 
 Add these keys:
