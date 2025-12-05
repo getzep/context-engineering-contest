@@ -35,15 +35,23 @@ This contest challenges you to optimize context retrieval for a coding agent usi
 
 Make sure you open the Codespace on your fork (not the original repository) so you can push branches and create PRs.
 
+**What happens when you launch:**
+- The entire repository opens in VS Code
+- Dependencies are automatically installed with `uv sync`
+- A `.env` file is automatically created from the template
+- Your integrated terminal opens in the `zep-eval-harness` directory, ready to go
+
 ### 2. Set Up API Keys
 
-Your Codespace opens directly in the `zep-eval-harness` folder, so you're ready to go. Set up your environment:
+After your Codespace finishes setting up (watch for the welcome message), edit the automatically-created `.env` file with your API keys:
 
 ```bash
-cp .env.example .env
+# The .env file is in the zep-eval-harness directory
+# Your terminal is already there, so just edit it:
+code .env
 ```
 
-Edit the `.env` file with the following keys:
+Add these keys:
 
 **OpenAI API Key** (shared for this workshop):
 ```
