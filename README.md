@@ -45,9 +45,21 @@ Make sure you open the Codespace on your fork (not the original repository) so y
 
 After your Codespace finishes setting up, edit the automatically-created `.env` file in the workspace root directory with your API keys:
 
-**OpenAI API Key** (shared for this workshop):
+**OpenAI API Key**:
+
+If you already have an OpenAI API key, paste it into your `.env` file:
 ```
-OPENAI_API_KEY=<provided-in-workshop>
+OPENAI_API_KEY=your_openai_api_key_here
+```
+
+If you don't have an OpenAI account yet, follow these steps:
+1. Navigate to [https://auth.openai.com/log-in](https://auth.openai.com/log-in)
+2. Create an account and organization
+3. Add $5 of credits. Unfortunately this is required, though each evaluation run costs on the order of $0.10 so you're unlikely to need more than these five dollars
+4. Copy and use the API key that the onboarding process prompts you to create
+5. Paste your API key into your `.env` file:
+```
+OPENAI_API_KEY=your_openai_api_key_here
 ```
 
 **Zep API Key** (create your own):

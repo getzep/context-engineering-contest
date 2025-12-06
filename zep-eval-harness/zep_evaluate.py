@@ -16,7 +16,98 @@ from typing import List, Dict, Any, Tuple, Optional
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 from openai import AsyncOpenAI
+from openai import RateLimitError, APIError
 from zep_cloud.client import AsyncZep
+
+# ============================================================================
+# OpenAI API Retry Logic with Exponential Backoff
+# ============================================================================
+
+
+async def retry_with_exponential_backoff(
+    func,
+    max_retries: int = 6,
+    initial_delay: float = 1.0,
+    max_delay: float = 60.0,
+    max_total_wait: float = 60.0,
+    *args,
+    **kwargs
+):
+    """
+    Retry an async function with exponential backoff.
+
+    Args:
+        func: Async function to retry
+        max_retries: Maximum number of retry attempts (default: 6)
+        initial_delay: Initial delay in seconds (default: 1.0)
+        max_delay: Maximum delay between retries in seconds (default: 60.0)
+        max_total_wait: Maximum total wait time across all retries (default: 60.0)
+        *args, **kwargs: Arguments to pass to the function
+
+    Returns:
+        Result from the function call
+
+    Raises:
+        The last exception encountered if all retries fail
+    """
+    import random
+
+    total_wait_time = 0.0
+    last_exception = None
+
+    for attempt in range(max_retries):
+        try:
+            return await func(*args, **kwargs)
+        except RateLimitError as e:
+            last_exception = e
+            if attempt == max_retries - 1:
+                print(f"❌ OpenAI API rate limit: All {max_retries} retry attempts exhausted")
+                raise
+
+            # Calculate exponential backoff with jitter
+            delay = min(initial_delay * (2 ** attempt), max_delay)
+            # Add random jitter (±25% of delay)
+            jitter = delay * (0.75 + random.random() * 0.5)
+
+            # Check if we would exceed max total wait time
+            if total_wait_time + jitter > max_total_wait:
+                remaining_time = max_total_wait - total_wait_time
+                if remaining_time > 0:
+                    print(f"⏱️  OpenAI rate limit hit. Waiting {remaining_time:.1f}s (max time reached)")
+                    await asyncio.sleep(remaining_time)
+                print(f"❌ OpenAI API rate limit: Maximum wait time of {max_total_wait}s exceeded")
+                raise
+
+            print(f"⚠️  OpenAI rate limit hit (attempt {attempt + 1}/{max_retries}). Retrying in {jitter:.1f}s...")
+            await asyncio.sleep(jitter)
+            total_wait_time += jitter
+
+        except APIError as e:
+            last_exception = e
+            if attempt == max_retries - 1:
+                print(f"❌ OpenAI API error: All {max_retries} retry attempts exhausted")
+                raise
+
+            # For API errors, use a shorter backoff
+            delay = min(initial_delay * (2 ** attempt) * 0.5, max_delay * 0.5)
+            jitter = delay * (0.75 + random.random() * 0.5)
+
+            if total_wait_time + jitter > max_total_wait:
+                remaining_time = max_total_wait - total_wait_time
+                if remaining_time > 0:
+                    print(f"⏱️  OpenAI API error. Waiting {remaining_time:.1f}s (max time reached)")
+                    await asyncio.sleep(remaining_time)
+                print(f"❌ OpenAI API error: Maximum wait time of {max_total_wait}s exceeded")
+                raise
+
+            print(f"⚠️  OpenAI API error (attempt {attempt + 1}/{max_retries}): {str(e)}. Retrying in {jitter:.1f}s...")
+            await asyncio.sleep(jitter)
+            total_wait_time += jitter
+
+    # This should never be reached, but just in case
+    if last_exception:
+        raise last_exception
+
 
 # OK to change - Search configuration
 FACTS_LIMIT = 5  # Number of facts (edges) to return
@@ -29,7 +120,7 @@ CONTEXT_LATENCY_LIMIT_MS = 2000  # Maximum milliseconds for context construction
 
 # DO NOT CHANGE - LLM Model configuration
 LLM_RESPONSE_MODEL = "gpt-5-mini"  # Model used for generating responses
-LLM_JUDGE_MODEL = "gpt-4.1"  # Model used for grading responses
+LLM_JUDGE_MODEL = "gpt-5-mini"  # Model used for grading responses
 
 
 # ============================================================================
@@ -376,7 +467,7 @@ def extract_assistant_answer(response) -> str:
 
 async def generate_ai_response(
     openai_client: AsyncOpenAI, context: str, question: str
-) -> Tuple[str, int]:
+) -> Tuple[str, int, int]:
     """
     Generate an answer to a question using the provided Zep context.
 
@@ -386,7 +477,7 @@ async def generate_ai_response(
         question: Question to answer
 
     Returns:
-        Tuple of (AI-generated answer string, prompt token count)
+        Tuple of (AI-generated answer string, input token count, output token count)
     """
     system_prompt = f"""
 You are an intelligent AI assistant helping a user with their questions.
@@ -400,22 +491,26 @@ You have access to the user's conversation history and relevant information in t
 Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
 """
 
-    response = await openai_client.responses.create(
-        model=LLM_RESPONSE_MODEL,
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": question},
-        ],
-        reasoning=(
-            {"effort": "medium"} if LLM_RESPONSE_MODEL.startswith("gpt-5") else None
-        ),
-        temperature=0.0 if not LLM_RESPONSE_MODEL.startswith("gpt-5") else None,
-    )
+    async def _make_request():
+        return await openai_client.responses.create(
+            model=LLM_RESPONSE_MODEL,
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": question},
+            ],
+            reasoning=(
+                {"effort": "medium"} if LLM_RESPONSE_MODEL.startswith("gpt-5") else None
+            ),
+            temperature=0.0 if not LLM_RESPONSE_MODEL.startswith("gpt-5") else None,
+        )
+
+    response = await retry_with_exponential_backoff(_make_request)
 
     # Extract token usage
-    prompt_tokens = response.usage.input_tokens if response.usage else 0
+    input_tokens = response.usage.input_tokens if response.usage else 0
+    output_tokens = response.usage.output_tokens if response.usage else 0
 
-    return extract_assistant_answer(response) or "", prompt_tokens
+    return extract_assistant_answer(response) or "", input_tokens, output_tokens
 
 
 # ============================================================================
@@ -425,7 +520,7 @@ Using only the information in the CONTEXT, answer the user's questions. Keep res
 
 async def grade_ai_response(
     openai_client: AsyncOpenAI, question: str, golden_answer: str, ai_response: str
-) -> Tuple[bool, str]:
+) -> Tuple[bool, str, int, int]:
     """
     Grade an AI response against golden answer using an LLM judge.
 
@@ -436,7 +531,7 @@ async def grade_ai_response(
         ai_response: The AI-generated response to evaluate
 
     Returns:
-        Tuple of (is_correct: bool, reasoning: str)
+        Tuple of (is_correct: bool, reasoning: str, input tokens: int, output tokens: int)
     """
     system_prompt = """
 You are an expert grader that determines if AI responses are correct.
@@ -462,7 +557,7 @@ Please evaluate if the response is semantically equivalent to the golden answer.
 Evaluation Guidelines:
 - The response must contain ALL key information from the golden answer (names, locations, actions, etc.)
 - The response doesn't need to match exact wording, but must not omit or change critical details
-- If the golden answer specifies a specific name, the response must include that name, not a generic term. 
+- If the golden answer specifies a specific name, the response must include that name, not a generic term.
 - Some variation is allowed for commonly acceptable names e.g. NYC or New York may be used to refer to New York City
 - If the golden answer includes specific details (location, times, etc.), those must be present
 - If the response is missing ANY critical information from the golden answer, return false
@@ -482,20 +577,27 @@ Examples of CORRECT responses:
 Please provide your evaluation:
 """
 
-    response = await openai_client.responses.parse(
-        model=LLM_JUDGE_MODEL,
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": grading_prompt},
-        ],
-        text_format=Grade,
-        reasoning=({"effort": "low"} if LLM_JUDGE_MODEL.startswith("gpt-5") else None),
-        temperature=0.0 if not LLM_JUDGE_MODEL.startswith("gpt-5") else None,
-    )
+    async def _make_request():
+        return await openai_client.responses.parse(
+            model=LLM_JUDGE_MODEL,
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": grading_prompt},
+            ],
+            text_format=Grade,
+            reasoning=({"effort": "low"} if LLM_JUDGE_MODEL.startswith("gpt-5") else None),
+            temperature=0.0 if not LLM_JUDGE_MODEL.startswith("gpt-5") else None,
+        )
+
+    response = await retry_with_exponential_backoff(_make_request)
 
     result = response.output_parsed
 
-    return result.correct, result.reasoning
+    # Extract token usage
+    input_tokens = response.usage.input_tokens if response.usage else 0
+    output_tokens = response.usage.output_tokens if response.usage else 0
+
+    return result.correct, result.reasoning, input_tokens, output_tokens
 
 
 # ============================================================================
@@ -505,7 +607,7 @@ Please provide your evaluation:
 
 async def evaluate_context_completeness(
     openai_client: AsyncOpenAI, question: str, golden_answer: str, context: str
-) -> Tuple[str, str, List[str], List[str]]:
+) -> Tuple[str, str, List[str], List[str], int, int]:
     """
     Evaluate whether the retrieved context contains adequate information to answer the question.
     This is the PRIMARY evaluation metric - assessing context quality independent of the AI's answer.
@@ -517,7 +619,7 @@ async def evaluate_context_completeness(
         context: Retrieved context from Zep graph search
 
     Returns:
-        Tuple of (completeness_grade, reasoning, missing_elements, present_elements)
+        Tuple of (completeness_grade, reasoning, missing_elements, present_elements, input_tokens, output_tokens)
         where completeness_grade is one of: COMPLETE, PARTIAL, INSUFFICIENT
     """
     system_prompt = """
@@ -574,25 +676,34 @@ For your evaluation:
 Please evaluate the context completeness:
 """
 
-    response = await openai_client.responses.parse(
-        model=LLM_JUDGE_MODEL,
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": completeness_prompt},
-        ],
-        text_format=CompletenessGrade,
-        reasoning=({"effort": "low"} if LLM_JUDGE_MODEL.startswith("gpt-5") else None),
-        temperature=0.0 if not LLM_JUDGE_MODEL.startswith("gpt-5") else None,
-    )
+    async def _make_request():
+        return await openai_client.responses.parse(
+            model=LLM_JUDGE_MODEL,
+            input=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": completeness_prompt},
+            ],
+            text_format=CompletenessGrade,
+            reasoning=({"effort": "low"} if LLM_JUDGE_MODEL.startswith("gpt-5") else None),
+            temperature=0.0 if not LLM_JUDGE_MODEL.startswith("gpt-5") else None,
+        )
+
+    response = await retry_with_exponential_backoff(_make_request)
 
     result = response.output_parsed
     completeness_grade = result.completeness.strip().upper()
+
+    # Extract token usage
+    input_tokens = response.usage.input_tokens if response.usage else 0
+    output_tokens = response.usage.output_tokens if response.usage else 0
 
     return (
         completeness_grade,
         result.reasoning,
         result.missing_elements,
         result.present_elements,
+        input_tokens,
+        output_tokens,
     )
 
 
@@ -663,9 +774,10 @@ async def process_single_query(
     response_task = generate_ai_response(openai_client, context, query)
 
     # Execute in parallel
-    (completeness_grade, completeness_reasoning, missing_elements, present_elements), (
+    (completeness_grade, completeness_reasoning, missing_elements, present_elements, completeness_input_tokens, completeness_output_tokens), (
         ai_answer,
-        prompt_tokens,
+        response_input_tokens,
+        response_output_tokens,
     ) = await asyncio.gather(completeness_task, response_task)
 
     completeness_duration_ms = (time() - completeness_start) * 1000
@@ -673,7 +785,7 @@ async def process_single_query(
 
     # Step 4: Grade Response (SECONDARY METRIC) - must wait for AI answer
     grading_start = time()
-    answer_grade, answer_reasoning = await grade_ai_response(
+    answer_grade, answer_reasoning, grading_input_tokens, grading_output_tokens = await grade_ai_response(
         openai_client, query, golden_answer, ai_answer
     )
     grading_duration_ms = (time() - grading_start) * 1000
@@ -724,8 +836,15 @@ async def process_single_query(
         "response_duration_ms": response_duration_ms,
         "grading_duration_ms": grading_duration_ms,
         "total_duration_ms": total_duration_ms,
-        # Token usage
-        "response_prompt_tokens": prompt_tokens,
+        # Token usage - detailed breakdown
+        "response_input_tokens": response_input_tokens,
+        "response_output_tokens": response_output_tokens,
+        "completeness_input_tokens": completeness_input_tokens,
+        "completeness_output_tokens": completeness_output_tokens,
+        "grading_input_tokens": grading_input_tokens,
+        "grading_output_tokens": grading_output_tokens,
+        "total_input_tokens": response_input_tokens + completeness_input_tokens + grading_input_tokens,
+        "total_output_tokens": response_output_tokens + completeness_output_tokens + grading_output_tokens,
     }
 
 
@@ -964,15 +1083,16 @@ def calculate_aggregate_statistics(
         stdev_grading = 0
 
     # Token statistics
-    prompt_tokens_list = [r["response_prompt_tokens"] for r in all_user_results]
-    total_prompt_tokens = sum(prompt_tokens_list)
+    total_input_tokens = sum(r["total_input_tokens"] for r in all_user_results)
+    total_output_tokens = sum(r["total_output_tokens"] for r in all_user_results)
 
-    if total_questions > 1:
-        median_prompt_tokens = statistics.median(prompt_tokens_list)
-        stdev_prompt_tokens = statistics.stdev(prompt_tokens_list)
-    else:
-        median_prompt_tokens = prompt_tokens_list[0]
-        stdev_prompt_tokens = 0
+    # Per-function token breakdown
+    total_response_input = sum(r["response_input_tokens"] for r in all_user_results)
+    total_response_output = sum(r["response_output_tokens"] for r in all_user_results)
+    total_completeness_input = sum(r["completeness_input_tokens"] for r in all_user_results)
+    total_completeness_output = sum(r["completeness_output_tokens"] for r in all_user_results)
+    total_grading_input = sum(r["grading_input_tokens"] for r in all_user_results)
+    total_grading_output = sum(r["grading_output_tokens"] for r in all_user_results)
 
     # Context truncation, timeout, and latency statistics
     truncated_count = sum(1 for r in all_user_results if r.get("context_truncated", False))
@@ -1050,9 +1170,15 @@ def calculate_aggregate_statistics(
             "completeness_stdev_ms": stdev_completeness,
         },
         "tokens": {
-            "prompt_median": median_prompt_tokens,
-            "prompt_stdev": stdev_prompt_tokens,
-            "total_prompt": total_prompt_tokens,
+            "total_input_tokens": total_input_tokens,
+            "total_output_tokens": total_output_tokens,
+            "total_tokens": total_input_tokens + total_output_tokens,
+            "response_input_tokens": total_response_input,
+            "response_output_tokens": total_response_output,
+            "completeness_input_tokens": total_completeness_input,
+            "completeness_output_tokens": total_completeness_output,
+            "grading_input_tokens": total_grading_input,
+            "grading_output_tokens": total_grading_output,
         },
         "context": {
             "truncated_count": truncated_count,
@@ -1190,10 +1316,13 @@ def print_summary(stats: Dict[str, Any]):
 
     # Token Usage
     print(f"\nToken Usage:")
-    print(
-        f"  Prompt tokens per query: {aggregate['tokens']['prompt_median']:.0f} ± {aggregate['tokens']['prompt_stdev']:.0f}"
-    )
-    print(f"  Total prompt tokens:     {aggregate['tokens']['total_prompt']}")
+    print(f"  Total input tokens:      {aggregate['tokens']['total_input_tokens']:,}")
+    print(f"  Total output tokens:     {aggregate['tokens']['total_output_tokens']:,}")
+    print(f"  Total tokens:            {aggregate['tokens']['total_tokens']:,}")
+    print(f"\n  Breakdown by function:")
+    print(f"    Response generation:   {aggregate['tokens']['response_input_tokens']:,} in / {aggregate['tokens']['response_output_tokens']:,} out")
+    print(f"    Completeness eval:     {aggregate['tokens']['completeness_input_tokens']:,} in / {aggregate['tokens']['completeness_output_tokens']:,} out")
+    print(f"    Answer grading:        {aggregate['tokens']['grading_input_tokens']:,} in / {aggregate['tokens']['grading_output_tokens']:,} out")
 
     # Context Stats
     print(f"\nContext:")
