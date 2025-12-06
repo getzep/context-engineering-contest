@@ -1401,18 +1401,38 @@ def print_summary(stats: Dict[str, Any]):
             )
             header = f"{display_name} ({needle_desc})" if needle_desc else display_name
 
-            print(f"{header} - {scores['total_tests']} tests:")
-            print("-" * 80)
+            # Highlight hard category
+            is_hard = category == "hard"
+            if is_hard:
+                print(f"\n{'*'*80}")
+                print(f"*** {header} - {scores['total_tests']} tests (KEY CONTEST METRIC) ***")
+                print(f"{'*'*80}")
+            else:
+                print(f"{header} - {scores['total_tests']} tests:")
+                print("-" * 80)
+
             print(
                 f"  Completeness: COMPLETE={scores['completeness']['complete_rate']:.1f}%, "
                 f"PARTIAL={scores['completeness']['partial_rate']:.1f}%, "
                 f"INSUFFICIENT={scores['completeness']['insufficient_rate']:.1f}%"
             )
-            print(
-                f"  Accuracy:     {scores['accuracy']['accuracy_rate']:.1f}% "
-                f"({scores['accuracy']['correct']}/{scores['total_tests']} correct)"
-            )
-            print()
+
+            # Highlight accuracy for hard category
+            if is_hard:
+                print(
+                    f"  >>> Accuracy: {scores['accuracy']['accuracy_rate']:.2f}% <<<"
+                    f" ({scores['accuracy']['correct']}/{scores['total_tests']} correct)"
+                )
+            else:
+                print(
+                    f"  Accuracy:     {scores['accuracy']['accuracy_rate']:.1f}% "
+                    f"({scores['accuracy']['correct']}/{scores['total_tests']} correct)"
+                )
+
+            if is_hard:
+                print(f"{'*'*80}\n")
+            else:
+                print()
 
 
 # ============================================================================
