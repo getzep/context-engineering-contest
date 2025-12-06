@@ -110,9 +110,9 @@ async def retry_with_exponential_backoff(
 
 
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
-ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+FACTS_LIMIT = 4  # Number of facts (edges) to return
+ENTITIES_LIMIT = 4  # Number of entities (nodes) to return
+EPISODES_LIMIT = 4  # Number of episodes to return (when enabled)
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
