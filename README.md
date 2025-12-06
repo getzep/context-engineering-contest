@@ -251,7 +251,7 @@ The only requirement is that your context block must include at least some infor
 - The dataset
 - The character limit (2000 characters)
 - The latency limit (2 seconds)
-- LLM models (`gpt-4.1-mini` for responses, `gpt-4.1` for judging)
+- LLM models (`gpt-5-mini` for both responses and judging)
 
 ### Do Not Overfit
 
