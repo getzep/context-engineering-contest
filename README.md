@@ -41,11 +41,38 @@ Make sure you open the Codespace on your fork (not the original repository) so y
 - A `.env` file is automatically created from the template
 - Your integrated terminal opens in the `zep-eval-harness` directory, ready to go
 
-### 2. Set Up API Keys
+### 2. Data Ingestion
 
-After your Codespace finishes setting up, edit the automatically-created `.env` file in the workspace root directory with your API keys:
+Before running the evaluation, you need to ingest the Marcus Chen dataset into your Zep account. Follow these steps:
 
-**OpenAI API Key**:
+#### Set Up Zep API Key
+
+After your Codespace finishes setting up, edit the automatically-created `.env` file in the workspace root directory with your Zep API key:
+
+1. Go to [https://app.getzep.com/](https://app.getzep.com/) and sign up for a free account
+2. After sign-up, you'll be prompted to create an API key
+3. Copy your API key and paste it into your `.env` file:
+```
+ZEP_API_KEY=your_zep_api_key_here
+```
+
+#### Run the Ingestion Script
+
+Once your Zep API key is configured, run the ingestion script to populate your account with the Marcus Chen dataset:
+
+```bash
+uv run zep_ingest.py
+```
+
+**Important**: This ingestion process takes approximately 15-20 minutes to complete as it processes 100+ conversation messages sequentially. The script will show progress updates as it processes the data.
+
+### 3. Run Evaluation
+
+Once the ingestion is complete and your OpenAI API key is configured, you can run the evaluation.
+
+#### Set Up OpenAI API Key
+
+Edit your `.env` file to add your OpenAI API key:
 
 If you already have an OpenAI API key, paste it into your `.env` file:
 ```
@@ -62,25 +89,15 @@ If you don't have an OpenAI account yet, follow these steps:
 OPENAI_API_KEY=your_openai_api_key_here
 ```
 
-**Zep API Key** (create your own):
-1. Go to [https://app.getzep.com/](https://app.getzep.com/) and sign up for a free account
-2. After sign-up, you'll be prompted to create an API key
-3. Copy your API key and paste it into your `.env` file:
-```
-ZEP_API_KEY=your_zep_api_key_here
-```
+#### Run the Evaluation Script
 
-When you create your Zep account, the `marcus_chen_001` user and dataset are automatically provisioned—no ingestion scripts needed.
-
-### 3. Run Evaluation
-
-Once your API keys are configured, run the evaluation:
+Once your OpenAI API key is configured, run the evaluation:
 
 ```bash
 uv run zep_evaluate.py
 ```
 
-This runs the evaluation using the Marcus Chen user that has already been provisioned in your account. You'll see completeness and accuracy scores for easy, medium, and hard test categories.
+This runs the evaluation using the Marcus Chen user data you ingested into your Zep account. You'll see completeness and accuracy scores for easy, medium, and hard test categories.
 
 ### Viewing Full Evaluation Results
 
