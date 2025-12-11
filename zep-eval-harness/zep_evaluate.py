@@ -24,14 +24,13 @@ from zep_cloud.client import AsyncZep
 # ============================================================================
 
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
+FACTS_LIMIT = 20  # Number of facts (edges) to return
 ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+EPISODES_LIMIT = 20  # Number of episodes to return (when enabled)
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
 CONTEXT_LATENCY_LIMIT_MS = 2000  # Maximum milliseconds for context construction (0 = no limit)
-
 # DO NOT CHANGE - LLM Model configuration
 LLM_RESPONSE_MODEL = "gpt-5-mini"  # Model used for generating responses
 LLM_JUDGE_MODEL = "gpt-5-mini"  # Model used for grading responses
@@ -494,6 +493,8 @@ You have access to the user's conversation history and relevant information in t
 
 Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
 """
+    
+    print(context)
 
     async def _make_request():
         return await openai_client.responses.create(
