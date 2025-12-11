@@ -1,0 +1,34 @@
+{
+  "run_number": 1,
+  "timestamp": "2025-12-10T16:10:20.244238",
+  "ontology": {
+    "type": "default_zep",
+    "default_ontology_disabled": false,
+    "custom_entity_types": [],
+    "custom_edge_types": []
+  },
+  "users": [
+    {
+      "base_user_id": "marcus_chen_001",
+      "zep_user_id": "marcus_chen_001_b8d49feb",
+      "first_name": "Marcus",
+      "last_name": "Chen",
+      "thread_ids": [
+        "conv_001_b8d49feb",
+        "conv_011_b8d49feb",
+        "conv_007_b8d49feb",
+        "conv_006_b8d49feb",
+        "conv_010_b8d49feb",
+        "conv_009_b8d49feb",
+        "conv_005_b8d49feb",
+        "conv_012_b8d49feb",
+        "conv_004_b8d49feb",
+        "conv_008_b8d49feb",
+        "conv_003_b8d49feb",
+        "conv_002_b8d49feb"
+      ],
+      "num_conversations": 12,
+      "num_telemetry_files": 5
+    }
+  ]
+}
