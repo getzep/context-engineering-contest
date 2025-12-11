@@ -24,9 +24,9 @@ from zep_cloud.client import AsyncZep
 # ============================================================================
 
 # OK to change - Search configuration
-FACTS_LIMIT = 40     # Get way more facts to see what's available
-ENTITIES_LIMIT = 20   # More entities
-EPISODES_LIMIT = 10   # Keep episodes moderate
+FACTS_LIMIT = 5
+ENTITIES_LIMIT = 15
+EPISODES_LIMIT = 20
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
