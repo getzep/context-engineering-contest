@@ -23,10 +23,38 @@ from zep_cloud.client import AsyncZep
 # Configuration Constants
 # ============================================================================
 
+"""
+5
+2
+2 --> 5 % 
+
+4
+5
+2   
+
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
-ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+FACTS_LIMIT = 2
+ENTITIES_LIMIT = 2
+EPISODES_LIMIT = 6  --> 20% 
+
+FACTS_LIMIT = 1
+ENTITIES_LIMIT = 1
+EPISODES_LIMIT = 6 --> 20% 
+
+FACTS_LIMIT = 1
+ENTITIES_LIMIT = 3
+EPISODES_LIMIT = 6
+
+FACTS_LIMIT = 0
+ENTITIES_LIMIT = 1
+EPISODES_LIMIT = 7
+
+"""
+
+# OK to change - Search configuration
+FACTS_LIMIT = 5      # Some structured facts for key relationships
+ENTITIES_LIMIT = 4   # Entity summaries consolidate multiple facts
+EPISODES_LIMIT = 6   # Episodes have raw conversation data with full details 
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
@@ -316,119 +344,47 @@ async def _perform_graph_search(
 
 def _format_search_results(search_results: Dict[str, Any]) -> str:
     """
-    Internal helper: Format graph search results into a context block string.
-
-    Args:
-        search_results: Dictionary containing episodes, nodes, and edges
-
-    Returns:
-        Formatted context block string for LLM consumption
+    Internal helper: Format graph search results into a concise context block.
+    Optimized for token efficiency - high-signal content first, minimal formatting.
     """
     context_parts = []
 
-    has_episodes = search_results.get("episodes") is not None
-
-    # Header
-    if has_episodes:
-        context_parts.append(
-            "FACTS, ENTITIES, and EPISODES represent relevant context to the current conversation.\n"
-        )
-    else:
-        context_parts.append(
-            "FACTS and ENTITIES represent relevant context to the current conversation.\n"
-        )
-
-    # Facts section (edges with temporal validity, labels, and attributes)
-    context_parts.append("# These are the most relevant facts")
-    context_parts.append('# Facts ending in "present" are currently valid')
-    context_parts.append("# Facts with a past end date are NO LONGER VALID.")
-    context_parts.append("<FACTS>")
-
     edges = getattr(search_results["edges"], "edges", [])
     if edges:
+        context_parts.append("=== FACTS ===")
         for edge in edges:
-            fact = getattr(edge, "fact", "No fact available")
-            valid_at = getattr(edge, "valid_at", None)
+            fact = getattr(edge, "fact", "")
             invalid_at = getattr(edge, "invalid_at", None)
-            labels = getattr(edge, "labels", None)
-            attributes = getattr(edge, "attributes", None)
+            # Mark current vs past facts concisely
+            status = "" if invalid_at is None else " [past]"
+            if fact:
+                context_parts.append(f"• {fact}{status}")
+        context_parts.append("")
 
-            # Format temporal validity
-            valid_at_str = valid_at if valid_at else "unknown"
-            invalid_at_str = invalid_at if invalid_at else "present"
 
-            context_parts.append(
-                f"{fact} (Date range: {valid_at_str} - {invalid_at_str})"
-            )
-
-            # Add labels if present
-            if labels and len(labels) > 0:
-                context_parts.append(f"  Labels: {', '.join(labels)}")
-
-            # Add attributes if present
-            if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"  Attributes:")
-                for attr_name, attr_value in attributes.items():
-                    context_parts.append(f"    {attr_name}: {attr_value}")
-
-            context_parts.append("")  # Blank line between facts
-    else:
-        context_parts.append("No relevant facts found")
-
-    context_parts.append("</FACTS>\n")
-
-    # Entities section (nodes with labels and attributes)
-    context_parts.append(
-        "# These are the most relevant entities (people, locations, organizations, items, and more)."
-    )
-    context_parts.append("<ENTITIES>")
-
+    # ENTITY SUMMARIES FIRST - these consolidate multiple facts and are highest value
     nodes = getattr(search_results["nodes"], "nodes", [])
     if nodes:
+        context_parts.append("=== KEY SUMMARIES ===")
         for node in nodes:
             name = getattr(node, "name", "Unknown")
-            labels = getattr(node, "labels", None)
-            attributes = getattr(node, "attributes", None)
-            summary = getattr(node, "summary", "No summary available")
+            summary = getattr(node, "summary", "")
+            if summary:
+                context_parts.append(f"[{name}] {summary}")
+        context_parts.append("")
 
-            context_parts.append(f"Name: {name}")
+    # FACTS - concise format, only show if currently valid
 
-            # Add labels if present, filtering out generic "Entity" label when multiple labels exist
-            if labels and len(labels) > 0:
-                filtered_labels = (
-                    [l for l in labels if l != "Entity"] if len(labels) > 1 else labels
-                )
-                if filtered_labels:
-                    context_parts.append(f"Labels: {', '.join(filtered_labels)}")
-
-            # Add attributes if present
-            if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"Attributes:")
-                for attr_name, attr_value in attributes.items():
-                    context_parts.append(f"  {attr_name}: {attr_value}")
-
-            context_parts.append(f"Summary: {summary}")
-            context_parts.append("")  # Blank line between entities
-    else:
-        context_parts.append("No relevant entities found")
-
-    context_parts.append("</ENTITIES>")
-
-    # Episodes section (optional)
-    if has_episodes:
-        context_parts.append("\n# These are the most relevant episodes")
-        context_parts.append("<EPISODES>")
-
-        episodes = getattr(search_results["episodes"], "episodes", [])
+    # EPISODES - raw conversation data, no timestamps (they waste chars)
+    episodes_data = search_results.get("episodes")
+    if episodes_data:
+        episodes = getattr(episodes_data, "episodes", [])
         if episodes:
+            context_parts.append("=== CONVERSATIONS ===")
             for episode in episodes:
-                content = getattr(episode, "content", "No content available")
-                created_at = getattr(episode, "created_at", "Unknown date")
-                context_parts.append(f"({created_at}) {content}")
-        else:
-            context_parts.append("No relevant episodes found")
-
-        context_parts.append("</EPISODES>")
+                content = getattr(episode, "content", "")
+                if content:
+                    context_parts.append(content)
 
     return "\n".join(context_parts)
 
@@ -483,16 +439,18 @@ async def generate_ai_response(
     Returns:
         Tuple of (AI-generated answer string, input token count, output token count)
     """
-    system_prompt = f"""
-You are an intelligent AI assistant helping a user with their questions.
-
-You have access to the user's conversation history and relevant information in the CONTEXT.
+    system_prompt = f"""You are a coding assistant with memory of the user's preferences, conventions, and workflow.
 
 <CONTEXT>
 {context}
 </CONTEXT>
 
-Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
+INSTRUCTIONS:
+- Answer ONLY using information from the CONTEXT above.
+- When the question asks for "all", "complete", "full", or multiple items, provide a COMPREHENSIVE list of EVERY relevant detail found in the context. Do not summarize or omit items.
+- Format multi-item answers as a clear list or enumeration.
+- For simple questions (single fact), give a brief, direct answer.
+- If the context contains conflicting information, prefer facts marked as currently valid (ending in "present").
 """
 
     async def _make_request():
