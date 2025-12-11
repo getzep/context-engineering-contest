@@ -23,10 +23,38 @@ from zep_cloud.client import AsyncZep
 # Configuration Constants
 # ============================================================================
 
+"""
+5
+2
+2 --> 5 % 
+
+4
+5
+2   
+
 # OK to change - Search configuration
-FACTS_LIMIT = 5
-ENTITIES_LIMIT = 15
-EPISODES_LIMIT = 20
+FACTS_LIMIT = 2
+ENTITIES_LIMIT = 2
+EPISODES_LIMIT = 6  --> 20% 
+
+FACTS_LIMIT = 1
+ENTITIES_LIMIT = 1
+EPISODES_LIMIT = 6 --> 20% 
+
+FACTS_LIMIT = 1
+ENTITIES_LIMIT = 3
+EPISODES_LIMIT = 6
+
+FACTS_LIMIT = 0
+ENTITIES_LIMIT = 1
+EPISODES_LIMIT = 7
+
+"""
+
+# OK to change - Search configuration
+FACTS_LIMIT = 3      # Some structured facts for key relationships
+ENTITIES_LIMIT = 2   # Entity summaries consolidate multiple facts
+EPISODES_LIMIT = 5   # Episodes have raw conversation data with full details 
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
@@ -483,16 +511,18 @@ async def generate_ai_response(
     Returns:
         Tuple of (AI-generated answer string, input token count, output token count)
     """
-    system_prompt = f"""
-You are an intelligent AI assistant helping a user with their questions.
-
-You have access to the user's conversation history and relevant information in the CONTEXT.
+    system_prompt = f"""You are a coding assistant with memory of the user's preferences, conventions, and workflow.
 
 <CONTEXT>
 {context}
 </CONTEXT>
 
-Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
+INSTRUCTIONS:
+- Answer ONLY using information from the CONTEXT above.
+- When the question asks for "all", "complete", "full", or multiple items, provide a COMPREHENSIVE list of EVERY relevant detail found in the context. Do not summarize or omit items.
+- Format multi-item answers as a clear list or enumeration.
+- For simple questions (single fact), give a brief, direct answer.
+- If the context contains conflicting information, prefer facts marked as currently valid (ending in "present").
 """
 
     async def _make_request():
