@@ -24,9 +24,9 @@ from zep_cloud.client import AsyncZep
 # ============================================================================
 
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
-ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+FACTS_LIMIT = 10  # Number of facts (edges) to return
+ENTITIES_LIMIT = 10  # Number of entities (nodes) to return
+EPISODES_LIMIT = 10  # Number of episodes to return (when enabled)
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
@@ -339,9 +339,7 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
         )
 
     # Facts section (edges with temporal validity, labels, and attributes)
-    context_parts.append("# These are the most relevant facts")
-    context_parts.append('# Facts ending in "present" are currently valid')
-    context_parts.append("# Facts with a past end date are NO LONGER VALID.")
+    context_parts.append("# Note that present facts are valid, past end date ones are no longer valid.")
     context_parts.append("<FACTS>")
 
     edges = getattr(search_results["edges"], "edges", [])
@@ -358,18 +356,18 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
             invalid_at_str = invalid_at if invalid_at else "present"
 
             context_parts.append(
-                f"{fact} (Date range: {valid_at_str} - {invalid_at_str})"
+                f"{fact} ({valid_at_str} - {invalid_at_str})"
             )
 
             # Add labels if present
             if labels and len(labels) > 0:
-                context_parts.append(f"  Labels: {', '.join(labels)}")
+                context_parts.append(f"{', '.join(labels)}")
 
             # Add attributes if present
             if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"  Attributes:")
+                # context_parts.append(f"Attributes:")
                 for attr_name, attr_value in attributes.items():
-                    context_parts.append(f"    {attr_name}: {attr_value}")
+                    context_parts.append(f"{attr_name}: {attr_value}")
 
             context_parts.append("")  # Blank line between facts
     else:
@@ -378,9 +376,9 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
     context_parts.append("</FACTS>\n")
 
     # Entities section (nodes with labels and attributes)
-    context_parts.append(
-        "# These are the most relevant entities (people, locations, organizations, items, and more)."
-    )
+    # context_parts.append(
+    #     "# These are the most relevant entities (people, locations, organizations, items, and more)."
+    # )
     context_parts.append("<ENTITIES>")
 
     nodes = getattr(search_results["nodes"], "nodes", [])
@@ -391,7 +389,7 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
             attributes = getattr(node, "attributes", None)
             summary = getattr(node, "summary", "No summary available")
 
-            context_parts.append(f"Name: {name}")
+            context_parts.append(f"{name} - {summary}")
 
             # Add labels if present, filtering out generic "Entity" label when multiple labels exist
             if labels and len(labels) > 0:
@@ -399,16 +397,13 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
                     [l for l in labels if l != "Entity"] if len(labels) > 1 else labels
                 )
                 if filtered_labels:
-                    context_parts.append(f"Labels: {', '.join(filtered_labels)}")
+                    context_parts.append(f"{', '.join(filtered_labels)}")
 
             # Add attributes if present
             if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"Attributes:")
                 for attr_name, attr_value in attributes.items():
                     context_parts.append(f"  {attr_name}: {attr_value}")
 
-            context_parts.append(f"Summary: {summary}")
-            context_parts.append("")  # Blank line between entities
     else:
         context_parts.append("No relevant entities found")
 
@@ -416,7 +411,7 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
 
     # Episodes section (optional)
     if has_episodes:
-        context_parts.append("\n# These are the most relevant episodes")
+        # context_parts.append("\n# These are the most relevant episodes")
         context_parts.append("<EPISODES>")
 
         episodes = getattr(search_results["episodes"], "episodes", [])
@@ -473,11 +468,11 @@ async def generate_ai_response(
     openai_client: AsyncOpenAI, context: str, question: str
 ) -> Tuple[str, int, int]:
     """
-    Generate an answer to a question using the provided Zep context.
+    Generate an answer to a question using the provided context.
 
     Args:
         openai_client: AsyncOpenAI client instance
-        context: Retrieved context from Zep graph search
+        context: Retrieved context from graph search
         question: Question to answer
 
     Returns:
@@ -492,7 +487,7 @@ You have access to the user's conversation history and relevant information in t
 {context}
 </CONTEXT>
 
-Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
+Using the information in the CONTEXT, and common sense, answer the questions. Keep responses SHORT.
 """
 
     async def _make_request():
