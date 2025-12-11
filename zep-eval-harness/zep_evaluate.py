@@ -6,6 +6,7 @@ Combines graph search, AI response generation, and evaluation into a single pipe
 import os
 import sys
 import json
+import re
 import glob
 import asyncio
 import statistics
@@ -24,9 +25,10 @@ from zep_cloud.client import AsyncZep
 # ============================================================================
 
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
-ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+# OK to change - Search configuration
+FACTS_LIMIT = 35      # Optimized by grid search
+ENTITIES_LIMIT = 10   # Optimized by grid search
+EPISODES_LIMIT = 5    # Optimized by grid search
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
@@ -225,6 +227,8 @@ def load_run_manifest(run_number: Optional[int] = None) -> Tuple[Dict[str, Any],
     return manifest, run_dir
 
 
+
+
 async def load_all_test_cases() -> Dict[str, List[Dict[str, Any]]]:
     """
     Load all test case files from data/test_cases/ directory.
@@ -258,7 +262,12 @@ async def load_all_test_cases() -> Dict[str, List[Dict[str, Any]]]:
 
 
 async def _perform_graph_search(
-    zep_client: AsyncZep, user_id: str, query: str, include_episodes: bool = True
+    zep_client: AsyncZep, 
+    user_id: str, 
+    query: str, 
+    include_episodes: bool = True,
+    facts_limit: int = FACTS_LIMIT,
+    entities_limit: int = ENTITIES_LIMIT
 ) -> Dict[str, Any]:
     """
     Internal helper: Perform parallel graph search across nodes and edges, optionally including episodes.
@@ -280,7 +289,7 @@ async def _perform_graph_search(
         user_id=user_id,
         query=query,
         scope="nodes",
-        limit=ENTITIES_LIMIT,
+        limit=entities_limit,
         reranker="cross_encoder",
     )
 
@@ -288,7 +297,7 @@ async def _perform_graph_search(
         user_id=user_id,
         query=query,
         scope="edges",
-        limit=FACTS_LIMIT,
+        limit=facts_limit,
         reranker="cross_encoder",
     )
 
@@ -316,8 +325,8 @@ async def _perform_graph_search(
 
 def _format_search_results(search_results: Dict[str, Any]) -> str:
     """
-    Internal helper: Format graph search results into a context block string.
-
+    Internal helper: Format graph search results for maximum information density.
+    
     Args:
         search_results: Dictionary containing episodes, nodes, and edges
 
@@ -326,109 +335,106 @@ def _format_search_results(search_results: Dict[str, Any]) -> str:
     """
     context_parts = []
 
-    has_episodes = search_results.get("episodes") is not None
-
-    # Header
-    if has_episodes:
-        context_parts.append(
-            "FACTS, ENTITIES, and EPISODES represent relevant context to the current conversation.\n"
-        )
-    else:
-        context_parts.append(
-            "FACTS and ENTITIES represent relevant context to the current conversation.\n"
-        )
-
-    # Facts section (edges with temporal validity, labels, and attributes)
-    context_parts.append("# These are the most relevant facts")
-    context_parts.append('# Facts ending in "present" are currently valid')
-    context_parts.append("# Facts with a past end date are NO LONGER VALID.")
-    context_parts.append("<FACTS>")
-
+    # 1. FACTS (Edges) - Highest density, most specific answers
     edges = getattr(search_results["edges"], "edges", [])
     if edges:
+        seen_facts = set()
+        unique_facts = []
+        
         for edge in edges:
-            fact = getattr(edge, "fact", "No fact available")
-            valid_at = getattr(edge, "valid_at", None)
-            invalid_at = getattr(edge, "invalid_at", None)
-            labels = getattr(edge, "labels", None)
-            attributes = getattr(edge, "attributes", None)
+            fact_content = getattr(edge, "fact", "")
+            
+            # Skip "Assistant" actions (usually history/logs)
+            if fact_content.startswith("Assistant"):
+                continue
+                
+            # Skip clear "status update" markers
+            if any(marker in fact_content.lower() for marker in [
+                "asked about", "requesting a review", 
+                "switched to", "created the branch", "created a new branch",
+                "needs to start", "needs to have time", "intends to",
+                "is aware of", "is involved in", "is associated with",
+                "found the", "located the"
+            ]):
+                continue
 
-            # Format temporal validity
-            valid_at_str = valid_at if valid_at else "unknown"
-            invalid_at_str = invalid_at if invalid_at else "present"
+            # Clean up metadata
+            fact_clean = re.sub(r"\s*\(Date range:.*?\)", "", fact_content).strip()
+            
+            if fact_clean and fact_clean not in seen_facts:
+                seen_facts.add(fact_clean)
+                unique_facts.append(fact_clean)
+        
+        # --- PRIORITIZATION ---
+        # Bucket facts into "Policy/Rule" vs "General Info"
+        policy_keywords = [
+            "must", "should", "always", "never", "standard", "required", 
+            "requirement", "prohibit", "allow", "convention", "policy", 
+            "guide", "setup", "configured", "mapped", "runs on", "uses"
+        ]
+        
+        policy_facts = []
+        other_facts = []
+        
+        for fact in unique_facts:
+            is_policy = any(k in fact.lower() for k in policy_keywords)
+            if is_policy:
+                policy_facts.append(fact)
+            else:
+                other_facts.append(fact)
+                
+        # Interleave or prioritize? Prioritize policies.
+        # Keep original order within buckets (assuming Zep reranker did a decent job)
+        final_facts = policy_facts + other_facts
+        
+        # Hard limit to 25 facts to ensure space for Entities/History
+        final_facts = final_facts[:25]
+        
+        if final_facts:
+            context_parts.append("FACTS:")
+            for fact in final_facts:
+                context_parts.append(f"- {fact}")
+            context_parts.append("")
 
-            context_parts.append(
-                f"{fact} (Date range: {valid_at_str} - {invalid_at_str})"
-            )
-
-            # Add labels if present
-            if labels and len(labels) > 0:
-                context_parts.append(f"  Labels: {', '.join(labels)}")
-
-            # Add attributes if present
-            if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"  Attributes:")
-                for attr_name, attr_value in attributes.items():
-                    context_parts.append(f"    {attr_name}: {attr_value}")
-
-            context_parts.append("")  # Blank line between facts
-    else:
-        context_parts.append("No relevant facts found")
-
-    context_parts.append("</FACTS>\n")
-
-    # Entities section (nodes with labels and attributes)
-    context_parts.append(
-        "# These are the most relevant entities (people, locations, organizations, items, and more)."
-    )
-    context_parts.append("<ENTITIES>")
-
+    # 2. ENTITIES (Nodes) - Detailed context
     nodes = getattr(search_results["nodes"], "nodes", [])
     if nodes:
+        entities = []
+        seen_entities = set()
+        
         for node in nodes:
-            name = getattr(node, "name", "Unknown")
-            labels = getattr(node, "labels", None)
-            attributes = getattr(node, "attributes", None)
-            summary = getattr(node, "summary", "No summary available")
+            name = getattr(node, "name", "")
+            summary = getattr(node, "summary", "")
+            
+            # Filter noise: The user context is often redundant/verbose
+            if "Marcus Chen" in name or name == "User":
+                continue
 
-            context_parts.append(f"Name: {name}")
+            # Truncate long summaries to save space
+            if len(summary) > 120:
+                summary = summary[:120] + "..."
 
-            # Add labels if present, filtering out generic "Entity" label when multiple labels exist
-            if labels and len(labels) > 0:
-                filtered_labels = (
-                    [l for l in labels if l != "Entity"] if len(labels) > 1 else labels
-                )
-                if filtered_labels:
-                    context_parts.append(f"Labels: {', '.join(filtered_labels)}")
+            if name and summary and name not in seen_entities:
+                seen_entities.add(name)
+                entities.append(f"• {name}: {summary}")
+        
+        if entities:
+            context_parts.append("ENTITIES:")
+            context_parts.extend(entities)
+            context_parts.append("")
 
-            # Add attributes if present
-            if attributes and isinstance(attributes, dict) and len(attributes) > 0:
-                context_parts.append(f"Attributes:")
-                for attr_name, attr_value in attributes.items():
-                    context_parts.append(f"  {attr_name}: {attr_value}")
-
-            context_parts.append(f"Summary: {summary}")
-            context_parts.append("")  # Blank line between entities
-    else:
-        context_parts.append("No relevant entities found")
-
-    context_parts.append("</ENTITIES>")
-
-    # Episodes section (optional)
-    if has_episodes:
-        context_parts.append("\n# These are the most relevant episodes")
-        context_parts.append("<EPISODES>")
-
-        episodes = getattr(search_results["episodes"], "episodes", [])
+    # 3. CONVERSATIONS (Episodes) - Last resort for details
+    episodes_result = search_results.get("episodes")
+    if episodes_result:
+        episodes = getattr(episodes_result, "episodes", [])
         if episodes:
-            for episode in episodes:
-                content = getattr(episode, "content", "No content available")
-                created_at = getattr(episode, "created_at", "Unknown date")
-                context_parts.append(f"({created_at}) {content}")
-        else:
-            context_parts.append("No relevant episodes found")
-
-        context_parts.append("</EPISODES>")
+            context_parts.append("HISTORY:")
+            for episode in episodes[:3]:
+                content = getattr(episode, "content", "")
+                if content and not content.strip().startswith('{'):
+                    if len(content) > 200:
+                        content = content[:200] + "..."
+                    context_parts.append(f"• {content}")
 
     return "\n".join(context_parts)
 
@@ -438,25 +444,50 @@ async def construct_context_block(
 ) -> str:
     """
     Construct a context block by performing graph search and formatting results.
-    This is the main entry point for context construction.
-
-    Args:
-        zep_client: AsyncZep client instance
-        user_id: User ID for graph search
-        query: Search query string
-        include_episodes: Whether to search episodes (default: True)
-
-    Returns:
-        Formatted context block string for LLM consumption
     """
+    from time import time # Import time for performance measurement
+    start_time = time()
+    
+    # Don't search episodes if EPISODES_LIMIT is 0
+    should_include_episodes = include_episodes and EPISODES_LIMIT > 0
+
+    # Dynamic limits based on query intent
+    facts_limit = 40
+    entities_limit = 10
+    
+    # HARD QUESTIONS: "all" or "complete" = comprehensive retrieval
+    if re.search(r"(what are all|what's my complete|what is my complete|all my|complete.*?(workflow|setup|stack|requirements?))", query, re.IGNORECASE):
+        facts_limit = 50  # Maximum facts for comprehensive questions
+        entities_limit = 3  # Minimal entities to save space
+        should_include_episodes = False  # Skip episodes, focus on facts
+    
+    # Procedural/Workflow questions need MORE FACTS
+    elif re.search(r"(how to|workflow|process|steps|when|schedule|cycle|procedure|guide)", query, re.IGNORECASE):
+        facts_limit = 50
+        entities_limit = 5
+        
+    # Definition/Stack/Convention questions need SOME ENTITIES  
+    elif re.search(r"(what (is|are)|stack|setup|requirement|convention|standard|approach|vocabulary|define|meaning)", query, re.IGNORECASE):
+        facts_limit = 25
+        entities_limit = 25
+
+    # Perform search
     search_results = await _perform_graph_search(
-        zep_client, user_id, query, include_episodes
+        zep_client, 
+        user_id, 
+        query, 
+        should_include_episodes,
+        facts_limit=facts_limit,
+        entities_limit=entities_limit
     )
-    return _format_search_results(search_results)
-
-
-# ============================================================================
-# Step 3: Generate AI Response
+    
+    # Format results
+    context_block = _format_search_results(search_results)
+    
+    duration = (time() - start_time) * 1000
+    print(f"  Context construction took {duration:.2f}ms")
+    
+    return context_block
 # ============================================================================
 
 
@@ -483,16 +514,17 @@ async def generate_ai_response(
     Returns:
         Tuple of (AI-generated answer string, input token count, output token count)
     """
-    system_prompt = f"""
-You are an intelligent AI assistant helping a user with their questions.
+    system_prompt = f"""You are a helpful AI assistant for a developer. Answer questions about their coding preferences, conventions, and workflows.
 
-You have access to the user's conversation history and relevant information in the CONTEXT.
-
-<CONTEXT>
+CONTEXT:
 {context}
-</CONTEXT>
 
-Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
+Instructions:
+- Use ONLY information from the CONTEXT above
+- The context contains verified facts (numbered) and entity descriptions
+- When multiple facts relate to the question, COMBINE them into a complete answer
+- Be SPECIFIC - include exact values, names, tools, and all requirements
+- Keep answers SHORT but COMPLETE - don't omit any relevant details
 """
 
     async def _make_request():
