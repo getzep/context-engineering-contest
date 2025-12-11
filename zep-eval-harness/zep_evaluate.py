@@ -52,8 +52,8 @@ EPISODES_LIMIT = 7
 """
 
 # OK to change - Search configuration
-FACTS_LIMIT = 3      # Some structured facts for key relationships
-ENTITIES_LIMIT = 3   # Entity summaries consolidate multiple facts
+FACTS_LIMIT = 5      # Some structured facts for key relationships
+ENTITIES_LIMIT = 4   # Entity summaries consolidate multiple facts
 EPISODES_LIMIT = 6   # Episodes have raw conversation data with full details 
 
 # DO NOT CHANGE - Context truncation and latency configuration
