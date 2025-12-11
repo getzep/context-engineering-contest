@@ -1,0 +1,8 @@
+PR Title,PR Link,Branch
+"[30%] Increase limits and refine context output formatting","https://github.com/getzep/context-engineering-contest/pull/19","main"
+"30.00% - Optimized system prompt, twisted knobs, and removed headers from context construction","https://github.com/getzep/context-engineering-contest/pull/17","main"
+"25.00% - custom ontology ","https://github.com/getzep/context-engineering-contest/pull/18","new-result"
+"25% hard category accuracy : Optimize context retrieval (Used trick of Multithreading & Parameter Optimization Strategy)","https://github.com/getzep/context-engineering-contest/pull/14","submission-25pct-dynamic-query-optimization"
+"25% - Parameters optimization for graph rag","https://github.com/getzep/context-engineering-contest/pull/16","main"
+"20%-submission","https://github.com/getzep/context-engineering-contest/pull/15","20percent"
+"15.0% - test-submission","https://github.com/getzep/context-engineering-contest/pull/9","Test-submission"
