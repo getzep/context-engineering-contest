@@ -1,0 +1,46 @@
+{
+  "run_number": 3,
+  "timestamp": "2025-12-11T03:14:53.610639",
+  "ontology": {
+    "type": "custom",
+    "default_ontology_disabled": true,
+    "custom_entity_types": [
+      "Technology",
+      "Convention",
+      "Project",
+      "Schedule",
+      "Person"
+    ],
+    "custom_edge_types": [
+      "USES",
+      "FOLLOWS",
+      "HAS_CONVENTION",
+      "SCHEDULED_FOR",
+      "RESPONSIBLE_FOR"
+    ]
+  },
+  "users": [
+    {
+      "base_user_id": "marcus_chen_001",
+      "zep_user_id": "marcus_chen_001_c38408d8",
+      "first_name": "Marcus",
+      "last_name": "Chen",
+      "thread_ids": [
+        "conv_002_c38408d8",
+        "conv_003_c38408d8",
+        "conv_004_c38408d8",
+        "conv_011_c38408d8",
+        "conv_006_c38408d8",
+        "conv_012_c38408d8",
+        "conv_005_c38408d8",
+        "conv_009_c38408d8",
+        "conv_007_c38408d8",
+        "conv_010_c38408d8",
+        "conv_008_c38408d8",
+        "conv_001_c38408d8"
+      ],
+      "num_conversations": 12,
+      "num_telemetry_files": 5
+    }
+  ]
+}

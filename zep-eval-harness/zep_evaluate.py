@@ -24,9 +24,9 @@ from zep_cloud.client import AsyncZep
 # ============================================================================
 
 # OK to change - Search configuration
-FACTS_LIMIT = 5  # Number of facts (edges) to return
-ENTITIES_LIMIT = 5  # Number of entities (nodes) to return
-EPISODES_LIMIT = 5  # Number of episodes to return (when enabled)
+FACTS_LIMIT = 20  # Number of facts (edges) to return
+ENTITIES_LIMIT = 10  # Number of entities (nodes) to return
+EPISODES_LIMIT = 10  # Number of episodes to return (when enabled)
 
 # DO NOT CHANGE - Context truncation and latency configuration
 CONTEXT_CHAR_LIMIT = 2000  # Maximum characters for context block (0 = no limit)
@@ -492,7 +492,11 @@ You have access to the user's conversation history and relevant information in t
 {context}
 </CONTEXT>
 
-Using only the information in the CONTEXT, answer the user's questions. Keep responses SHORT - one sentence when possible.
+Using only the information in the CONTEXT, answer the user's questions accurately. 
+- If the question asks for "all" or "complete" information, list everything from the context relevant to the topic.
+- Include all applicable details that relate to the question's subject matter.
+- Keep responses concise but comprehensive.
+- Do not invent or assume information not in the context.
 """
 
     async def _make_request():

@@ -1,22 +1,27 @@
 """
-Zep Custom Ontology
+Zep Custom Ontology for Coding Agents
 
-This ontology defines entity and edge types optimized for general conversational assistants.
+This ontology is optimized for capturing developer workflows and technical conventions.
 
 Design principles:
-- Simple, generic entity types that work across domains
-- Search-optimized: entity names contain specific values for semantic search
-- 1-2 attributes per entity following Zep best practices
-- Rich descriptions for full-text search on facts
+- Search-optimized: entity names contain specific technology/convention values
+- Technology-focused: captures tech stacks, frameworks, tools, and standards
+- Convention-aware: tracks coding styles, naming conventions, and best practices
+- Project-organized: groups context by project and component type
 
 Entity types:
-- Person: People mentioned in conversations (family, friends, colleagues, etc.)
-- Location: Physical places or addresses
-- Organization: Companies, institutions, or groups
-- Event: Appointments, meetings, or scheduled activities
-- Item: Physical objects, pets, or possessions
+- Technology: Programming languages, frameworks, libraries, tools (e.g., "Python", "FastAPI", "React")
+- Convention: Coding standards, naming rules, formatting rules (e.g., "2-space indentation", "camelCase functions")
+- Project: Codebases and software projects (e.g., "taskflow-frontend", "taskflow-api")
+- Schedule: Meeting times, deployment windows, recurring events
+- Person: Team members and their roles
 
-Edge types model relationships and enable sophisticated queries.
+Edge types:
+- Uses: Developer/Project uses a Technology
+- Follows: Code follows a Convention
+- HasConvention: Project has an associated Convention
+- ScheduledFor: Events scheduled at specific times/days
+- ResponsibleFor: Team member responsible for a domain
 """
 
 from pydantic import Field
@@ -24,126 +29,119 @@ from zep_cloud.external_clients.ontology import EntityModel, EdgeModel, EntityTe
 
 
 # ============================================================================
-# Entity Types (5 entities)
+# Entity Types (5 entities optimized for coding agents)
 # ============================================================================
 
 EMPTY_STRING = "Empty string if not available or applicable."
-MAX_LENGTH = 50
+MAX_LENGTH = 100
+
+
+class Technology(EntityModel):
+    """Programming languages, frameworks, libraries, tools, or technologies.
+    Entity names should be the technology name (e.g., "React", "PostgreSQL", "FastAPI").
+    Descriptions should include version, purpose, or usage context.
+    """
+
+    category: EntityText = Field(
+        default=None,
+        description="language, framework, library, database, tool, platform, other. "
+        + EMPTY_STRING,
+        max_length=MAX_LENGTH,
+    )
+
+
+class Convention(EntityModel):
+    """Coding standards, naming rules, formatting rules, or architectural patterns.
+    Entity names should describe the convention clearly (e.g., "2-space indentation", "snake_case_functions").
+    Descriptions should explain rationale or scope (e.g., "TypeScript convention", "Database tables").
+    """
+
+    scope: EntityText = Field(
+        default=None,
+        description="python, typescript, javascript, database, api, git, general, other. "
+        + EMPTY_STRING,
+        max_length=MAX_LENGTH,
+    )
+
+
+class Project(EntityModel):
+    """A software project, codebase, or service.
+    Entity names should be the project name (e.g., "taskflow-frontend", "taskflow-api").
+    Descriptions should include type, purpose, and tech stack summary.
+    """
+
+    project_type: EntityText = Field(
+        default=None,
+        description="frontend, backend, fullstack, service, library, infrastructure, other. "
+        + EMPTY_STRING,
+        max_length=MAX_LENGTH,
+    )
+
+
+class Schedule(EntityModel):
+    """Meeting times, deployment windows, or recurring events.
+    Entity names should describe the event clearly (e.g., "Daily standup", "Tuesday Thursday deployments").
+    Descriptions should include frequency, time, and attendees.
+    """
+
+    frequency: EntityText = Field(
+        default=None,
+        description="daily, weekly, biweekly, monthly, fixed_day, flexible, once, other. "
+        + EMPTY_STRING,
+        max_length=MAX_LENGTH,
+    )
 
 
 class Person(EntityModel):
-    """A person mentioned in conversation (family, friends, colleagues, etc.).
-    Entity names should be the person's name.
-    Descriptions should contain relationship to user, age, occupation, or other relevant details.
+    """Team members, developers, or roles.
+    Entity names should be the person's name or role.
+    Descriptions should include team affiliation, responsibilities, and expertise.
     """
 
-    relationship: EntityText = Field(
+    role: EntityText = Field(
         default=None,
-        description="family, friend, colleague, professional, acquaintance, other. "
-        + EMPTY_STRING,
-        max_length=MAX_LENGTH,
-    )
-
-
-class Location(EntityModel):
-    """A physical place or address.
-    Entity names should be the location name or address.
-    Descriptions should contain address details, purpose, or context about the location.
-    """
-
-    location_type: EntityText = Field(
-        default=None,
-        description="home, office, clinic, store, restaurant, park, school, other. "
-        + EMPTY_STRING,
-        max_length=MAX_LENGTH,
-    )
-
-
-class Organization(EntityModel):
-    """A company, institution, or group.
-    Entity names should be the organization name.
-    Descriptions should contain type of organization, services provided, or user's relationship to it.
-    """
-
-    org_type: EntityText = Field(
-        default=None,
-        description="company, school, hospital, store, service_provider, government, nonprofit, other. "
-        + EMPTY_STRING,
-        max_length=MAX_LENGTH,
-    )
-
-
-class Event(EntityModel):
-    """An appointment, meeting, or scheduled activity.
-    Entity names should describe the event and include date/time if specific.
-    Descriptions should contain location, participants, purpose, and any special details.
-    """
-
-    event_type: EntityText = Field(
-        default=None,
-        description="appointment, meeting, class, activity, celebration, other. "
-        + EMPTY_STRING,
-        max_length=MAX_LENGTH,
-    )
-
-
-class Item(EntityModel):
-    """A physical object, pet, or possession mentioned in conversation.
-    Entity names should be the item name or description.
-    Descriptions should contain type, purpose, condition, or other relevant details.
-    """
-
-    item_type: EntityText = Field(
-        default=None,
-        description="pet, vehicle, device, tool, furniture, clothing, other. "
+        description="frontend_engineer, backend_engineer, devops_engineer, lead, manager, other. "
         + EMPTY_STRING,
         max_length=MAX_LENGTH,
     )
 
 
 # ============================================================================
-# Edge Types (6 relationships, no attributes)
+# Edge Types (5 relationships, no attributes)
 # ============================================================================
 
 
-class RelatedTo(EdgeModel):
-    """Connects a Person to another Person or to the User.
-    Description should explain the nature of the relationship."""
+class Uses(EdgeModel):
+    """Project or Person uses a Technology.
+    Description should explain how/why the technology is used."""
 
     ...
 
 
-class LocatedAt(EdgeModel):
-    """Connects an Event, Person, or Item to a Location.
-    Description can provide additional context about the location relationship."""
+class Follows(EdgeModel):
+    """Code or Project follows a Convention.
+    Description should specify which parts/contexts follow the convention."""
 
     ...
 
 
-class WorksFor(EdgeModel):
-    """Connects a Person to an Organization where they work or are affiliated.
-    Description can include role, duration, or other employment details."""
+class HasConvention(EdgeModel):
+    """Project explicitly has an associated Convention as a standard.
+    Description should explain scope and when to apply."""
 
     ...
 
 
-class Owns(EdgeModel):
-    """User or Person owns an Item.
-    Description can include acquisition date, condition, or purpose."""
+class ScheduledFor(EdgeModel):
+    """An event or meeting is scheduled at specific times/days.
+    Description should include frequency, time windows, and purpose."""
 
     ...
 
 
-class ScheduledAt(EdgeModel):
-    """Connects an Event to a specific date/time or Location.
-    Description should include timing details and any special arrangements."""
-
-    ...
-
-
-class Involves(EdgeModel):
-    """Connects an Event to a Person, Item, or Organization that participates or is involved.
-    Description should explain the nature of involvement."""
+class ResponsibleFor(EdgeModel):
+    """Person is responsible for reviewing, maintaining, or owning a domain/project/technology.
+    Description should include scope and responsibilities."""
 
     ...
 
@@ -153,16 +151,15 @@ class Involves(EdgeModel):
 # ============================================================================
 
 # Entity type names
-ENTITY_TYPES = ["Person", "Location", "Organization", "Event", "Item"]
+ENTITY_TYPES = ["Technology", "Convention", "Project", "Schedule", "Person"]
 
 # Edge type names
 EDGE_TYPES = [
-    "RELATED_TO",
-    "LOCATED_AT",
-    "WORKS_FOR",
-    "OWNS",
-    "SCHEDULED_AT",
-    "INVOLVES",
+    "USES",
+    "FOLLOWS",
+    "HAS_CONVENTION",
+    "SCHEDULED_FOR",
+    "RESPONSIBLE_FOR",
 ]
 
 
@@ -173,20 +170,17 @@ EDGE_TYPES = [
 
 async def set_custom_ontology(zep_client, user_ids=None):
     """
-    Set a custom ontology for a Zep project.
+    Set a custom ontology optimized for coding agents and developer workflows.
 
-    This ontology is designed for general conversational assistants and captures:
-    - People and their relationships
-    - Locations and addresses
-    - Organizations and institutions
-    - Events and appointments
-    - Items and possessions (including pets)
+    This ontology captures:
+    - Technology: Languages, frameworks, libraries, tools
+    - Convention: Coding standards, naming rules, formatting
+    - Project: Software projects and codebases
+    - Schedule: Meetings, deployments, recurring events
+    - Person: Team members and their roles
 
-    Design philosophy:
-    - Simple, generic entity types applicable across domains
-    - Search-optimized entity naming (values in names)
-    - Rich descriptions for full-text search
-    - Flexible edge types for various relationship patterns
+    Relationships track how technologies are used, conventions are followed,
+    responsibilities are assigned, and schedules are maintained.
 
     Args:
         zep_client: AsyncZep client instance
@@ -207,61 +201,53 @@ async def set_custom_ontology(zep_client, user_ids=None):
 
     kwargs = {
         "entities": {
+            "Technology": Technology,
+            "Convention": Convention,
+            "Project": Project,
+            "Schedule": Schedule,
             "Person": Person,
-            "Location": Location,
-            "Organization": Organization,
-            "Event": Event,
-            "Item": Item,
         },
         "edges": {
-            # Person related to another Person or User
-            "RELATED_TO": (
-                RelatedTo,
+            # Project or Person uses a Technology
+            "USES": (
+                Uses,
                 [
-                    EntityEdgeSourceTarget(source="User", target="Person"),
-                    EntityEdgeSourceTarget(source="Person", target="Person"),
+                    EntityEdgeSourceTarget(source="User", target="Technology"),
+                    EntityEdgeSourceTarget(source="Project", target="Technology"),
+                    EntityEdgeSourceTarget(source="Person", target="Technology"),
                 ],
             ),
-            # Entity located at a Location
-            "LOCATED_AT": (
-                LocatedAt,
+            # Code/Project follows a Convention
+            "FOLLOWS": (
+                Follows,
                 [
-                    EntityEdgeSourceTarget(source="Event", target="Location"),
-                    EntityEdgeSourceTarget(source="Person", target="Location"),
-                    EntityEdgeSourceTarget(source="Item", target="Location"),
-                    EntityEdgeSourceTarget(source="Organization", target="Location"),
+                    EntityEdgeSourceTarget(source="User", target="Convention"),
+                    EntityEdgeSourceTarget(source="Project", target="Convention"),
                 ],
             ),
-            # Person works for Organization
-            "WORKS_FOR": (
-                WorksFor,
+            # Project has an explicit Convention as a standard
+            "HAS_CONVENTION": (
+                HasConvention,
                 [
-                    EntityEdgeSourceTarget(source="User", target="Organization"),
-                    EntityEdgeSourceTarget(source="Person", target="Organization"),
+                    EntityEdgeSourceTarget(source="Project", target="Convention"),
+                    EntityEdgeSourceTarget(source="Technology", target="Convention"),
                 ],
             ),
-            # User or Person owns Item
-            "OWNS": (
-                Owns,
+            # Event/Meeting scheduled at specific times
+            "SCHEDULED_FOR": (
+                ScheduledFor,
                 [
-                    EntityEdgeSourceTarget(source="User", target="Item"),
-                    EntityEdgeSourceTarget(source="Person", target="Item"),
+                    EntityEdgeSourceTarget(source="Schedule", target="Person"),
+                    EntityEdgeSourceTarget(source="User", target="Schedule"),
                 ],
             ),
-            # Event scheduled at Location or time
-            "SCHEDULED_AT": (
-                ScheduledAt,
+            # Person responsible for domain/project/technology
+            "RESPONSIBLE_FOR": (
+                ResponsibleFor,
                 [
-                    EntityEdgeSourceTarget(source="Event", target="Location"),
-                ],
-            ),
-            # Event involves Person, Item, or Organization
-            "INVOLVES": (
-                Involves,
-                [
-                    EntityEdgeSourceTarget(source="Event", target="Person"),
-                    EntityEdgeSourceTarget(source="Event", target="Item"),
-                    EntityEdgeSourceTarget(source="Event", target="Organization"),
+                    EntityEdgeSourceTarget(source="Person", target="Project"),
+                    EntityEdgeSourceTarget(source="Person", target="Technology"),
+                    EntityEdgeSourceTarget(source="Person", target="Convention"),
                 ],
             ),
         },
